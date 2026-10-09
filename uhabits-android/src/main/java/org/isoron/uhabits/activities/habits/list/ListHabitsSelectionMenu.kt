@@ -111,6 +111,11 @@ class ListHabitsSelectionMenu(
                 return true
             }
 
+            R.id.action_add_tag -> {
+                behavior.onAddTag()
+                return true
+            }
+
             R.id.action_color -> {
                 behavior.onChangeColor()
                 return true

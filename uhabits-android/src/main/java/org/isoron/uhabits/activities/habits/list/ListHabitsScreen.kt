@@ -36,6 +36,7 @@ import org.isoron.uhabits.activities.common.dialogs.CheckmarkDialog
 import org.isoron.uhabits.activities.common.dialogs.ColorPickerDialogFactory
 import org.isoron.uhabits.activities.common.dialogs.ConfirmDeleteDialog
 import org.isoron.uhabits.activities.common.dialogs.NumberDialog
+import org.isoron.uhabits.activities.common.dialogs.showAddTagDialog
 import org.isoron.uhabits.activities.habits.edit.HabitTypeDialog
 import org.isoron.uhabits.activities.habits.list.views.HabitCardListAdapter
 import org.isoron.uhabits.core.commands.ArchiveHabitsCommand
@@ -54,6 +55,7 @@ import org.isoron.uhabits.core.ui.ThemeSwitcher
 import org.isoron.uhabits.core.ui.callbacks.CheckMarkDialogCallback
 import org.isoron.uhabits.core.ui.callbacks.NumberPickerCallback
 import org.isoron.uhabits.core.ui.callbacks.OnColorPickedCallback
+import org.isoron.uhabits.core.ui.callbacks.OnTagPickedCallback
 import org.isoron.uhabits.core.ui.callbacks.OnConfirmedCallback
 import org.isoron.uhabits.core.ui.screens.habits.list.ListHabitsBehavior
 import org.isoron.uhabits.core.ui.screens.habits.list.ListHabitsBehavior.Message.COULD_NOT_EXPORT
@@ -267,6 +269,10 @@ class ListHabitsScreen(
         val picker = colorPickerFactory.create(defaultColor, themeSwitcher.currentTheme!!)
         picker.setListener(callback)
         picker.dismissCurrentAndShow(activity.supportFragmentManager, "picker")
+    }
+
+    override fun showTagPicker(existingTags: List<String>, callback: OnTagPickedCallback) {
+        showAddTagDialog(activity, existingTags) { callback.onTagPicked(it) }
     }
 
     override fun showNumberPopup(

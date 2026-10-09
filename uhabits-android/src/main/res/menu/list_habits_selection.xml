@@ -37,6 +37,11 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/action_add_tag"
+        android:title="@string/add_tag"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/action_unarchive_habit"
         android:title="@string/unarchive"
         app:showAsAction="never"/>

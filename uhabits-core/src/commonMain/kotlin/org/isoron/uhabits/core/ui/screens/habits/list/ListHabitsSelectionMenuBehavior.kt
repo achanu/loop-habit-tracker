@@ -19,6 +19,7 @@
 package org.isoron.uhabits.core.ui.screens.habits.list
 
 import me.tatarka.inject.annotations.Inject
+import org.isoron.uhabits.core.commands.AddTagCommand
 import org.isoron.uhabits.core.commands.ArchiveHabitsCommand
 import org.isoron.uhabits.core.commands.ChangeHabitColorCommand
 import org.isoron.uhabits.core.commands.CommandRunner
@@ -29,6 +30,7 @@ import org.isoron.uhabits.core.models.HabitList
 import org.isoron.uhabits.core.models.PaletteColor
 import org.isoron.uhabits.core.ui.callbacks.OnColorPickedCallback
 import org.isoron.uhabits.core.ui.callbacks.OnConfirmedCallback
+import org.isoron.uhabits.core.ui.callbacks.OnTagPickedCallback
 
 @Inject
 class ListHabitsSelectionMenuBehavior(
@@ -49,6 +51,19 @@ class ListHabitsSelectionMenuBehavior(
     fun canUnarchive(): Boolean {
         for (habit in adapter.getSelected()) if (!habit.isArchived) return false
         return true
+    }
+
+    fun onAddTag() {
+        val selected = adapter.getSelected()
+        if (selected.isEmpty()) return
+        val tags = mutableSetOf<String>()
+        for (habit in habitList) {
+            for (tag in habit.tags) tags.add(tag)
+        }
+        screen.showTagPicker(tags.sorted()) { tag ->
+            commandRunner.run(AddTagCommand(habitList, selected, tag))
+            adapter.clearSelection()
+        }
     }
 
     fun onArchiveHabits() {
@@ -104,5 +119,7 @@ class ListHabitsSelectionMenuBehavior(
         )
 
         fun showEditHabitsScreen(selected: List<Habit>)
+
+        fun showTagPicker(existingTags: List<String>, callback: OnTagPickedCallback)
     }
 }

@@ -22,6 +22,9 @@ package org.isoron.uhabits.activities.habits.show
 import android.content.Context
 import android.view.LayoutInflater
 import android.widget.FrameLayout
+import android.view.View.GONE
+import android.view.View.VISIBLE
+import org.isoron.uhabits.core.models.Habit
 import org.isoron.uhabits.core.ui.screens.habits.show.ShowHabitPresenter
 import org.isoron.uhabits.core.ui.screens.habits.show.ShowHabitState
 import org.isoron.uhabits.databinding.ShowHabitBinding
@@ -46,6 +49,12 @@ class ShowHabitView(context: Context) : FrameLayout(context) {
         )
         binding.subtitleCard.setState(data.subtitle)
         binding.overviewCard.setState(data.overview)
+        if (data.tags.isEmpty()) {
+            binding.tagsCard.visibility = GONE
+        } else {
+            binding.tagsCard.visibility = VISIBLE
+            binding.tagsCard.text = Habit.joinTags(data.tags)
+        }
         binding.notesCard.setState(data.notes)
         binding.targetCard.setState(data.target)
         binding.streakCard.setState(data.streaks)

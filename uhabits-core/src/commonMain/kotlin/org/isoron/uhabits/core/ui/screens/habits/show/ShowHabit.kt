@@ -48,6 +48,7 @@ data class ShowHabitState(
     val title: String = "",
     val isNumerical: Boolean = false,
     val color: PaletteColor = PaletteColor(1),
+    val tags: List<String> = emptyList(),
     val subtitle: SubtitleCardState,
     val overview: OverviewCardState,
     val notes: NotesCardState,
@@ -95,6 +96,7 @@ class ShowHabitPresenter(
                 title = habit.name,
                 color = habit.color,
                 isNumerical = habit.isNumerical,
+                tags = habit.tags,
                 theme = theme,
                 subtitle = SubtitleCardPresenter.buildState(
                     habit = habit,

@@ -232,4 +232,12 @@
     <string name="pref_midnight_delay_description">Poczekaj do 3:00, aby pokazać nowy dzień. Przydatne, jeśli zwykle kładziesz się spać po północy. Wymaga ponownego uruchomienia aplikacji.</string>
     <string name="select_public_backup_folder">Wybierz publiczny folder kopii zapasowych</string>
     <string name="no_public_backup_folder_selected">Nie wybrano folderu</string>
+    <string name="tags">Tagi</string>
+    <string name="tags_example">np. zdrowie, rano</string>
+    <string name="sort_groups_by_name">Grupy: według nazwy</string>
+    <string name="sort_groups_by_completion">Grupy: według ukończenia</string>
+    <string name="ungrouped">Bez tagów</string>
+    <string name="add_tag">Dodaj tag</string>
+    <string name="tag_removed">Usunięto tag</string>
+    <string name="undo">Cofnij</string>
 </resources>

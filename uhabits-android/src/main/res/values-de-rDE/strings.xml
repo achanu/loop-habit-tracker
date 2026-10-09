@@ -220,4 +220,12 @@
     <string name="pref_midnight_delay_description">Bis 3:00 Uhr warten, bevor ein neuer Tag angezeigt wird. Nützlich, wenn du normalerweise nach Mitternacht schlafen gehst. Benötigt einen Neustart der App.</string>
     <string name="select_public_backup_folder">Öffentlichen Backup-Ordner auswählen</string>
     <string name="no_public_backup_folder_selected">Kein Ordner ausgewählt</string>
+    <string name="tags">Tags</string>
+    <string name="tags_example">z. B. Gesundheit, Morgen</string>
+    <string name="sort_groups_by_name">Gruppen: nach Name</string>
+    <string name="sort_groups_by_completion">Gruppen: nach Abschluss</string>
+    <string name="ungrouped">Ohne Tags</string>
+    <string name="add_tag">Tag hinzufügen</string>
+    <string name="tag_removed">Tag entfernt</string>
+    <string name="undo">Rückgängig</string>
 </resources>

@@ -220,4 +220,12 @@
     <string name="pref_midnight_delay_description">Attendere fino alle 3:00 per mostrare il nuovo giorno. Utile se solitamente vai a dormire dopo mezzanotte. È necessario riavviare l\'app.</string>
     <string name="select_public_backup_folder">Seleziona cartella di backup pubblica</string>
     <string name="no_public_backup_folder_selected">Nessuna cartella selezionata</string>
+    <string name="tags">Etichette</string>
+    <string name="tags_example">es. salute, mattina</string>
+    <string name="sort_groups_by_name">Gruppi: per nome</string>
+    <string name="sort_groups_by_completion">Gruppi: per completamento</string>
+    <string name="ungrouped">Senza etichette</string>
+    <string name="add_tag">Aggiungi etichetta</string>
+    <string name="tag_removed">Etichetta rimossa</string>
+    <string name="undo">Annulla</string>
 </resources>

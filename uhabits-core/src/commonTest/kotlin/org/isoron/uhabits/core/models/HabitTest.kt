@@ -50,6 +50,15 @@ class HabitTest : BaseUnitTest() {
     }
 
     @Test
+    fun test_tagInputHelpers() {
+        assertEquals("mo", Habit.currentTagInput("health, mo"))
+        assertEquals("healt", Habit.currentTagInput("healt"))
+        assertEquals("", Habit.currentTagInput(""))
+        assertEquals("health, morning, ", Habit.appendTagInput("health, mo", "morning"))
+        assertEquals("health, ", Habit.appendTagInput("healt", "health"))
+    }
+
+    @Test
     fun test_copyAttributes() {
         val model = modelFactory.buildHabit()
         model.isArchived = true

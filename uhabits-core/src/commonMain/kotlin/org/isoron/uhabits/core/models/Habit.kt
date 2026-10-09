@@ -178,5 +178,13 @@ data class Habit(
             csv.split(',').map { it.trim() }.filter { it.isNotEmpty() }
 
         fun joinTags(tags: List<String>): String = tags.joinToString(",")
+
+        fun currentTagInput(text: String): String = text.substringAfterLast(',').trim()
+
+        fun appendTagInput(text: String, tag: String): String {
+            val prefix =
+                if (text.contains(',')) text.substringBeforeLast(',').trim() + ", " else ""
+            return prefix + tag + ", "
+        }
     }
 }

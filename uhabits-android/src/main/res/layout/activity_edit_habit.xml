@@ -146,7 +146,7 @@
                     <TextView
                         style="@style/FormLabel"
                         android:text="@string/tags" />
-                    <EditText
+                    <AutoCompleteTextView
                         android:id="@+id/tagsInput"
                         style="@style/FormInput"
                         android:maxLines="1"

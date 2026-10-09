@@ -20,6 +20,7 @@
 package org.isoron.uhabits.activities.habits.edit
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.res.ColorStateList
 import android.content.res.Resources
 import android.os.Bundle
@@ -28,6 +29,7 @@ import android.text.Spanned
 import android.text.format.DateFormat
 import android.view.View
 import android.widget.ArrayAdapter
+import android.widget.Filter
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -99,6 +101,20 @@ class EditHabitActivity : AppCompatActivity() {
         binding.root.applyBottomInset()
         binding.toolbar.applyToolbarInsets()
         setContentView(binding.root)
+
+        // ponytail: iterates all habits on the main thread to collect distinct
+        // tags; if this ever lags, move to the task runner.
+        val tagAdapter = TagSuggestionAdapter(
+            this,
+            component.habitList.flatMap { it.tags }.distinct()
+        )
+        binding.tagsInput.setAdapter(tagAdapter)
+        binding.tagsInput.setOnItemClickListener { _, _, position, _ ->
+            binding.tagsInput.setText(
+                Habit.appendTagInput(tagAdapter.fullText, tagAdapter.getItem(position)!!)
+            )
+            binding.tagsInput.setSelection(binding.tagsInput.text.length)
+        }
 
         if (intent.hasExtra("habitId")) {
             binding.toolbar.title = getString(R.string.edit_habit)
@@ -380,6 +396,34 @@ class EditHabitActivity : AppCompatActivity() {
             putInt("reminderHour", reminderHour)
             putInt("reminderMin", reminderMin)
             putInt("reminderDays", reminderDays.toInteger())
+        }
+    }
+}
+
+/**
+ * Suggests existing tags while the user types. Matches only the tag currently
+ * being typed — the text after the last comma.
+ */
+private class TagSuggestionAdapter(
+    context: Context,
+    private val all: List<String>
+) : ArrayAdapter<String>(context, android.R.layout.select_dialog_item, ArrayList(all)) {
+    var fullText = ""
+
+    override fun getFilter(): Filter = object : Filter() {
+        override fun performFiltering(constraint: CharSequence?): FilterResults {
+            fullText = constraint?.toString() ?: ""
+            val query = Habit.currentTagInput(fullText)
+            return FilterResults().apply {
+                values = all.filter { it.startsWith(query, ignoreCase = true) && it != query }
+            }
+        }
+
+        override fun publishResults(constraint: CharSequence?, results: FilterResults) {
+            clear()
+            @Suppress("UNCHECKED_CAST")
+            addAll(results.values as List<String>)
+            notifyDataSetChanged()
         }
     }
 }

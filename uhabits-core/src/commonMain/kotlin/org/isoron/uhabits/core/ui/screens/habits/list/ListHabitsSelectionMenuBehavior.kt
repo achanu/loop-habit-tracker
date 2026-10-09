@@ -31,7 +31,7 @@ import org.isoron.uhabits.core.models.HabitList
 import org.isoron.uhabits.core.models.PaletteColor
 import org.isoron.uhabits.core.ui.callbacks.OnColorPickedCallback
 import org.isoron.uhabits.core.ui.callbacks.OnConfirmedCallback
-import org.isoron.uhabits.core.ui.callbacks.OnTagPickedCallback
+import org.isoron.uhabits.core.ui.callbacks.OnTagsPickedCallback
 
 @Inject
 class ListHabitsSelectionMenuBehavior(
@@ -61,14 +61,24 @@ class ListHabitsSelectionMenuBehavior(
         for (habit in habitList) {
             for (tag in habit.tags) tags.add(tag)
         }
-        screen.showTagPicker(tags.sorted()) { tag ->
-            // Only the habits that did not have the tag yet, so that undo
+        screen.showTagPicker(tags.sorted()) { picked ->
+            // Only the habits that did not have each tag yet, so that undo
             // does not strip it from habits that had it all along.
-            val targets = selected.filter { tag !in it.tags }
-            if (targets.isEmpty()) return@showTagPicker
-            commandRunner.run(AddTagCommand(habitList, targets, tag))
-            screen.showUndoTagAdded(targets.size) {
-                commandRunner.run(RemoveTagCommand(habitList, targets, tag))
+            val addedTags = mutableListOf<String>()
+            val addedTargets = mutableListOf<List<Habit>>()
+            for (tag in picked) {
+                val targets = selected.filter { tag !in it.tags }
+                if (targets.isEmpty()) continue
+                commandRunner.run(AddTagCommand(habitList, targets, tag))
+                addedTags.add(tag)
+                addedTargets.add(targets)
+            }
+            val count = addedTargets.sumOf { it.size }
+            if (count == 0) return@showTagPicker
+            screen.showUndoTagAdded(count) {
+                for (i in addedTags.indices) {
+                    commandRunner.run(RemoveTagCommand(habitList, addedTargets[i], addedTags[i]))
+                }
             }
             adapter.clearSelection()
         }
@@ -128,7 +138,7 @@ class ListHabitsSelectionMenuBehavior(
 
         fun showEditHabitsScreen(selected: List<Habit>)
 
-        fun showTagPicker(existingTags: List<String>, callback: OnTagPickedCallback)
+        fun showTagPicker(existingTags: List<String>, callback: OnTagsPickedCallback)
 
         fun showUndoTagAdded(quantity: Int, undo: () -> Unit)
     }

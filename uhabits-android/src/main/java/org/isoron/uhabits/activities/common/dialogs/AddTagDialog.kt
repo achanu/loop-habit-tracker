@@ -116,15 +116,15 @@ class TagSuggestionAdapter(
 }
 
 /**
- * Shows a dialog that lets the user type a tag or tap one from a cloud of
- * [existingTags], and passes the entered tag to [onConfirm].
+ * Shows a dialog that lets the user select existing tags from a cloud or type
+ * new ones, and passes all chosen tags to [onConfirm].
  * // ponytail: the cloud is not height-capped; wrap it in a ScrollView if tag
  * // counts ever outgrow the dialog.
  */
 fun showAddTagDialog(
     context: Context,
     existingTags: List<String>,
-    onConfirm: (String) -> Unit
+    onConfirm: (List<String>) -> Unit
 ) {
     val input = AutoCompleteTextView(context)
     input.hint = context.getString(R.string.tags_example)
@@ -134,17 +134,16 @@ fun showAddTagDialog(
     val container = LinearLayout(context)
     container.orientation = LinearLayout.VERTICAL
     container.setPadding(pad, pad / 2, pad, 0)
+    val selected = mutableSetOf<String>()
     if (existingTags.isNotEmpty()) {
         val cloud = TagFlowLayout(context)
         for (tag in existingTags) {
-            cloud.addView(
-                tagChipView(context, tag) {
-                    val text = input.text.toString()
-                    if (tag in Habit.parseTags(text)) return@tagChipView
-                    input.setText(Habit.appendTagInput(text, tag))
-                    input.setSelection(input.text.length)
-                }
-            )
+            val chip = tagChipView(context, tag) {}
+            chip.setOnClickListener {
+                chip.isSelected = !chip.isSelected
+                if (chip.isSelected) selected.add(tag) else selected.remove(tag)
+            }
+            cloud.addView(chip)
         }
         container.addView(cloud, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
         input.setPadding(0, dp(context, 8f), 0, 0)
@@ -157,12 +156,13 @@ fun showAddTagDialog(
         .setTitle(R.string.add_tag)
         .setView(container)
         .setPositiveButton(R.string.save) { _, _ ->
-            val tag = input.text.trim().toString()
-            if (tag.isNotEmpty()) onConfirm(tag)
+            val picked = (selected + Habit.parseTags(input.text.toString())).toList()
+            if (picked.isNotEmpty()) onConfirm(picked)
         }
         .setNegativeButton(android.R.string.cancel, null)
         .show()
 }
+
 
 private const val MATCH_PARENT = LinearLayout.LayoutParams.MATCH_PARENT
 private const val WRAP_CONTENT = LinearLayout.LayoutParams.WRAP_CONTENT

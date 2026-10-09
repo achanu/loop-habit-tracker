@@ -56,7 +56,7 @@ import org.isoron.uhabits.core.ui.ThemeSwitcher
 import org.isoron.uhabits.core.ui.callbacks.CheckMarkDialogCallback
 import org.isoron.uhabits.core.ui.callbacks.NumberPickerCallback
 import org.isoron.uhabits.core.ui.callbacks.OnColorPickedCallback
-import org.isoron.uhabits.core.ui.callbacks.OnTagPickedCallback
+import org.isoron.uhabits.core.ui.callbacks.OnTagsPickedCallback
 import org.isoron.uhabits.core.ui.callbacks.OnConfirmedCallback
 import org.isoron.uhabits.core.ui.screens.habits.list.ListHabitsBehavior
 import org.isoron.uhabits.core.ui.screens.habits.list.ListHabitsBehavior.Message.COULD_NOT_EXPORT
@@ -272,8 +272,8 @@ class ListHabitsScreen(
         picker.dismissCurrentAndShow(activity.supportFragmentManager, "picker")
     }
 
-    override fun showTagPicker(existingTags: List<String>, callback: OnTagPickedCallback) {
-        showAddTagDialog(activity, existingTags) { callback.onTagPicked(it) }
+    override fun showTagPicker(existingTags: List<String>, callback: OnTagsPickedCallback) {
+        showAddTagDialog(activity, existingTags) { callback.onTagsPicked(it) }
     }
 
     override fun showUndoTagAdded(quantity: Int, undo: () -> Unit) {

@@ -18,6 +18,6 @@
  */
 package org.isoron.uhabits.core.ui.callbacks
 
-fun interface OnTagPickedCallback {
-    fun onTagPicked(tag: String)
+fun interface OnTagsPickedCallback {
+    fun onTagsPicked(tags: List<String>)
 }

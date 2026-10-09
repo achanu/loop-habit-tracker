@@ -174,8 +174,8 @@ class ShowHabitActivity : AppCompatActivity(), CommandRunner.Listener {
     private fun showAddTagDialog() {
         val tags = mutableSetOf<String>()
         for (habit in habitList) for (tag in habit.tags) tags.add(tag)
-        showAddTagDialog(this, tags.toList()) { tag ->
-            editTags((habit.tags + tag).distinct())
+        showAddTagDialog(this, tags.toList()) { picked ->
+            editTags((habit.tags + picked).distinct())
         }
     }
 

@@ -69,9 +69,9 @@ class ShowHabitView(context: Context) : FrameLayout(context) {
                     chip(tag) { tagListener?.onRemoveTag(tag) }
                 )
             }
-            binding.tagsCard.addView(
-                chip(context.getString(R.string.add_tag)) { tagListener?.onAddTag() }
-            )
+            val addChip = chip("+") { tagListener?.onAddTag() }
+            addChip.contentDescription = context.getString(R.string.add_tag)
+            binding.tagsCard.addView(addChip)
         }
         binding.notesCard.setState(data.notes)
         binding.targetCard.setState(data.target)

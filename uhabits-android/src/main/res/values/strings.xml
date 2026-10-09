@@ -186,6 +186,8 @@
     <string name="sort_groups_by_completion">Groups: by completion</string>
     <string name="ungrouped">No tags</string>
     <string name="add_tag">Add tag</string>
+    <string name="tag_removed">Tag removed</string>
+    <string name="undo">Undo</string>
     <string name="export">Export</string>
     <string name="long_press_to_edit">Press-and-hold to change the value</string>
     <string name="value">Value</string>

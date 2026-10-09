@@ -20,15 +20,12 @@ package org.isoron.uhabits.activities.habits.show
 
 import android.content.ContentUris
 import android.os.Bundle
-import android.util.TypedValue
 import android.view.HapticFeedbackConstants
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.AutoCompleteTextView
-import android.widget.LinearLayout
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -42,7 +39,7 @@ import org.isoron.uhabits.activities.common.dialogs.CheckmarkDialog
 import org.isoron.uhabits.activities.common.dialogs.ConfirmDeleteDialog
 import org.isoron.uhabits.activities.common.dialogs.HistoryEditorDialog
 import org.isoron.uhabits.activities.common.dialogs.NumberDialog
-import org.isoron.uhabits.activities.habits.edit.TagSuggestionAdapter
+import org.isoron.uhabits.activities.common.dialogs.showAddTagDialog
 import org.isoron.uhabits.core.commands.Command
 import org.isoron.uhabits.core.commands.CommandRunner
 import org.isoron.uhabits.core.commands.EditHabitCommand
@@ -108,7 +105,11 @@ class ShowHabitActivity : AppCompatActivity(), CommandRunner.Listener {
 
         view.tagListener = object : ShowHabitView.TagListener {
             override fun onRemoveTag(tag: String) {
-                editTags(habit.tags - tag)
+                val previous = habit.tags
+                editTags(previous - tag)
+                Snackbar.make(view, R.string.tag_removed, Snackbar.LENGTH_SHORT)
+                    .setAction(R.string.undo) { editTags(previous) }
+                    .show()
             }
 
             override fun onAddTag() {
@@ -171,32 +172,11 @@ class ShowHabitActivity : AppCompatActivity(), CommandRunner.Listener {
     }
 
     private fun showAddTagDialog() {
-        val pad = TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP, 20f, resources.displayMetrics
-        ).toInt()
-        val input = AutoCompleteTextView(this)
-        input.hint = getString(R.string.tags_example)
-        input.setAdapter(
-            TagSuggestionAdapter(this, habitList.flatMap { it.tags }.distinct())
-        )
-        val container = LinearLayout(this)
-        container.setPadding(pad, pad / 2, pad, 0)
-        container.addView(
-            input,
-            LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-        )
-        AlertDialog.Builder(this)
-            .setTitle(R.string.add_tag)
-            .setView(container)
-            .setPositiveButton(R.string.save) { _, _ ->
-                val tag = input.text.trim().toString()
-                if (tag.isNotEmpty()) editTags((habit.tags + tag).distinct())
-            }
-            .setNegativeButton(android.R.string.cancel, null)
-            .show()
+        val tags = mutableSetOf<String>()
+        for (habit in habitList) for (tag in habit.tags) tags.add(tag)
+        showAddTagDialog(this, tags.toList()) { tag ->
+            editTags((habit.tags + tag).distinct())
+        }
     }
 
     inner class Screen : ShowHabitMenuPresenter.Screen, ShowHabitPresenter.Screen {

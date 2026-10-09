@@ -20,7 +20,6 @@
 package org.isoron.uhabits.activities.habits.edit
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.content.res.ColorStateList
 import android.content.res.Resources
 import android.os.Bundle
@@ -29,7 +28,6 @@ import android.text.Spanned
 import android.text.format.DateFormat
 import android.view.View
 import android.widget.ArrayAdapter
-import android.widget.Filter
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -42,6 +40,7 @@ import org.isoron.uhabits.R
 import org.isoron.uhabits.activities.AndroidThemeSwitcher
 import org.isoron.uhabits.activities.common.dialogs.ColorPickerDialogFactory
 import org.isoron.uhabits.activities.common.dialogs.FrequencyPickerDialog
+import org.isoron.uhabits.activities.common.dialogs.TagSuggestionAdapter
 import org.isoron.uhabits.activities.common.dialogs.WeekdayPickerDialog
 import org.isoron.uhabits.core.commands.CommandRunner
 import org.isoron.uhabits.core.commands.CreateHabitCommand
@@ -396,34 +395,6 @@ class EditHabitActivity : AppCompatActivity() {
             putInt("reminderHour", reminderHour)
             putInt("reminderMin", reminderMin)
             putInt("reminderDays", reminderDays.toInteger())
-        }
-    }
-}
-
-/**
- * Suggests existing tags while the user types. Matches only the tag currently
- * being typed — the text after the last comma.
- */
-class TagSuggestionAdapter(
-    context: Context,
-    private val all: List<String>
-) : ArrayAdapter<String>(context, android.R.layout.select_dialog_item, ArrayList(all)) {
-    var fullText = ""
-
-    override fun getFilter(): Filter = object : Filter() {
-        override fun performFiltering(constraint: CharSequence?): FilterResults {
-            fullText = constraint?.toString() ?: ""
-            val query = Habit.currentTagInput(fullText)
-            return FilterResults().apply {
-                values = all.filter { it.startsWith(query, ignoreCase = true) && it != query }
-            }
-        }
-
-        override fun publishResults(constraint: CharSequence?, results: FilterResults) {
-            clear()
-            @Suppress("UNCHECKED_CAST")
-            addAll(results.values as List<String>)
-            notifyDataSetChanged()
         }
     }
 }

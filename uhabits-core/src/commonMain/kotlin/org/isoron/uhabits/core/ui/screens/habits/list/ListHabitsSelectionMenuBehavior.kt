@@ -24,6 +24,7 @@ import org.isoron.uhabits.core.commands.ArchiveHabitsCommand
 import org.isoron.uhabits.core.commands.ChangeHabitColorCommand
 import org.isoron.uhabits.core.commands.CommandRunner
 import org.isoron.uhabits.core.commands.DeleteHabitsCommand
+import org.isoron.uhabits.core.commands.RemoveTagCommand
 import org.isoron.uhabits.core.commands.UnarchiveHabitsCommand
 import org.isoron.uhabits.core.models.Habit
 import org.isoron.uhabits.core.models.HabitList
@@ -61,7 +62,14 @@ class ListHabitsSelectionMenuBehavior(
             for (tag in habit.tags) tags.add(tag)
         }
         screen.showTagPicker(tags.sorted()) { tag ->
-            commandRunner.run(AddTagCommand(habitList, selected, tag))
+            // Only the habits that did not have the tag yet, so that undo
+            // does not strip it from habits that had it all along.
+            val targets = selected.filter { tag !in it.tags }
+            if (targets.isEmpty()) return@showTagPicker
+            commandRunner.run(AddTagCommand(habitList, targets, tag))
+            screen.showUndoTagAdded(targets.size) {
+                commandRunner.run(RemoveTagCommand(habitList, targets, tag))
+            }
             adapter.clearSelection()
         }
     }
@@ -121,5 +129,7 @@ class ListHabitsSelectionMenuBehavior(
         fun showEditHabitsScreen(selected: List<Habit>)
 
         fun showTagPicker(existingTags: List<String>, callback: OnTagPickedCallback)
+
+        fun showUndoTagAdded(quantity: Int, undo: () -> Unit)
     }
 }

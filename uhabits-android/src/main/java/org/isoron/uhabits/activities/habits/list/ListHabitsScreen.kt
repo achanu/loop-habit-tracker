@@ -25,6 +25,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.snackbar.Snackbar
 import me.tatarka.inject.annotations.Inject
 import nl.dionsegijn.konfetti.core.Party
 import nl.dionsegijn.konfetti.core.Position
@@ -273,6 +274,16 @@ class ListHabitsScreen(
 
     override fun showTagPicker(existingTags: List<String>, callback: OnTagPickedCallback) {
         showAddTagDialog(activity, existingTags) { callback.onTagPicked(it) }
+    }
+
+    override fun showUndoTagAdded(quantity: Int, undo: () -> Unit) {
+        val snackbar = Snackbar.make(
+            rootView.value,
+            activity.getString(R.string.tag_added, quantity),
+            Snackbar.LENGTH_SHORT
+        )
+        snackbar.setAction(R.string.undo) { undo() }
+        snackbar.show()
     }
 
     override fun showNumberPopup(

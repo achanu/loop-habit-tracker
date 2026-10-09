@@ -35,7 +35,8 @@ data class HabitMatcher(
             if (q.isNotEmpty() &&
                 !habit.name.contains(q, ignoreCase = true) &&
                 !habit.question.contains(q, ignoreCase = true) &&
-                !habit.description.contains(q, ignoreCase = true)
+                !habit.description.contains(q, ignoreCase = true) &&
+                !habit.tags.any { it.contains(q, ignoreCase = true) }
             ) {
                 return false
             }

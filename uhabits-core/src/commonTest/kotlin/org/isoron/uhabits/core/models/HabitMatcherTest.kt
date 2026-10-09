@@ -27,12 +27,14 @@ class HabitMatcherTest : BaseUnitTest() {
     private fun buildHabit(
         name: String,
         question: String = "",
-        description: String = ""
+        description: String = "",
+        tags: List<String> = emptyList()
     ): Habit {
         val habit = modelFactory.buildHabit()
         habit.name = name
         habit.question = question
         habit.description = description
+        habit.tags = tags
         return habit
     }
 
@@ -91,6 +93,27 @@ class HabitMatcherTest : BaseUnitTest() {
 
         // No match
         assertMatches(habits, "swimming", emptyList())
+    }
+
+    @Test
+    fun testSearchByTag() {
+        val yoga = buildHabit("Yoga", tags = listOf("health", "morning"))
+        val running = buildHabit("Running", tags = listOf("cardio"))
+        val plain = buildHabit("Stretching")
+        val habits = listOf(yoga, running, plain)
+
+        // Match by tag, case-insensitive
+        assertMatches(habits, "health", listOf(yoga))
+        assertMatches(habits, "HEALTH", listOf(yoga))
+
+        // Match by tag when name and question do not contain the query
+        assertMatches(habits, "cardio", listOf(running))
+
+        // Query not in any tag
+        assertMatches(habits, "work", emptyList())
+
+        // Habit without tags still matches by name
+        assertMatches(habits, "stretch", listOf(plain))
     }
 
     private fun assertMatches(habits: List<Habit>, query: String, expected: List<Habit>) {

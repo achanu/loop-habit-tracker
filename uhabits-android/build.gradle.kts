@@ -19,7 +19,6 @@
 
 plugins {
     alias(libs.plugins.agp)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ksp)
     alias(libs.plugins.ktlint.plugin)
     alias(libs.plugins.mokkery)
@@ -73,7 +72,7 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = true
-            proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.txt")
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.txt")
             if (signingConfigs.findByName("release") != null) {
                 signingConfig = signingConfigs.getByName("release")
             }
@@ -90,12 +89,10 @@ android {
         sourceCompatibility(JavaVersion.VERSION_21)
     }
 
-    kotlin {
-        compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
-        }
+    buildFeatures {
+        viewBinding = true
+        buildConfig = true
     }
-    buildFeatures.viewBinding = true
     lint.abortOnError = false
 }
 

@@ -192,6 +192,8 @@
     <string name="target_type_at_most">At most</string>
     <string name="example_question_boolean">e.g. Did you exercise today?</string>
     <string name="question">Question</string>
+    <string name="tags">Tags</string>
+    <string name="tags_example">e.g. health, morning</string>
     <string name="target">Target</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>

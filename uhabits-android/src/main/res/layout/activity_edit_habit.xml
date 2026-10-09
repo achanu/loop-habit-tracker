@@ -140,6 +140,21 @@
                 </LinearLayout>
             </FrameLayout>
 
+            <!-- Tags -->
+            <FrameLayout style="@style/FormOuterBox">
+                <LinearLayout style="@style/FormInnerBox">
+                    <TextView
+                        style="@style/FormLabel"
+                        android:text="@string/tags" />
+                    <EditText
+                        android:id="@+id/tagsInput"
+                        style="@style/FormInput"
+                        android:maxLines="1"
+                        android:inputType="text"
+                        android:hint="@string/tags_example" />
+                </LinearLayout>
+            </FrameLayout>
+
             <!-- Frequency -->
             <FrameLayout
                 android:id="@+id/frequencyOuterBox"

@@ -33,6 +33,7 @@ data class Habit(
     var position: Int = 0,
     var question: String = "",
     var reminder: Reminder? = null,
+    var tags: List<String> = emptyList(),
     var targetType: NumericalHabitType = NumericalHabitType.AT_LEAST,
     var targetValue: Double = 0.0,
     var type: HabitType = HabitType.YES_NO,
@@ -119,6 +120,7 @@ data class Habit(
         this.position = other.position
         this.question = other.question
         this.reminder = other.reminder
+        this.tags = other.tags
         this.targetType = other.targetType
         this.targetValue = other.targetValue
         this.type = other.type
@@ -139,6 +141,7 @@ data class Habit(
         if (position != other.position) return false
         if (question != other.question) return false
         if (reminder != other.reminder) return false
+        if (tags != other.tags) return false
         if (targetType != other.targetType) return false
         if (targetValue != other.targetValue) return false
         if (type != other.type) return false
@@ -158,11 +161,22 @@ data class Habit(
         result = 31 * result + position
         result = 31 * result + question.hashCode()
         result = 31 * result + (reminder?.hashCode() ?: 0)
+        result = 31 * result + tags.hashCode()
         result = 31 * result + targetType.value
         result = 31 * result + targetValue.hashCode()
         result = 31 * result + type.value
         result = 31 * result + unit.hashCode()
         result = 31 * result + (uuid?.hashCode() ?: 0)
         return result
+    }
+
+    companion object {
+        // ponytail: tags stored as comma-separated text in the Habits table; commas inside a
+        // tag are impossible because parseTags drops them. If tags ever need SQL queries or
+        // metadata (colors, per-tag stats), switch to a junction table.
+        fun parseTags(csv: String): List<String> =
+            csv.split(',').map { it.trim() }.filter { it.isNotEmpty() }
+
+        fun joinTags(tags: List<String>): String = tags.joinToString(",")
     }
 }

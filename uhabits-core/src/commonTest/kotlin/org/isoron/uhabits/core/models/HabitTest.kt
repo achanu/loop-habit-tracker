@@ -42,6 +42,14 @@ class HabitTest : BaseUnitTest() {
     }
 
     @Test
+    fun test_parseAndJoinTags() {
+        assertEquals(emptyList(), Habit.parseTags(""))
+        assertEquals(listOf("health", "morning", "health"), Habit.parseTags(" health , morning ,, health "))
+        assertEquals("health,morning", Habit.joinTags(listOf("health", "morning")))
+        assertEquals("health,morning", Habit.joinTags(Habit.parseTags("health,morning")))
+    }
+
+    @Test
     fun test_copyAttributes() {
         val model = modelFactory.buildHabit()
         model.isArchived = true

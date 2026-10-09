@@ -23,9 +23,12 @@ import org.isoron.uhabits.core.models.Habit
 /**
  * One row of the habit list: either a group header ([habit] is null) or a
  * habit card ([tag] is null for ungrouped habits). A header with both null is
- * the unnamed group of habits without tags.
+ * the unnamed group of habits without tags. Headers carry their group's
+ * daily progression, computed once per rebuild.
  */
 class HabitListRow(val habit: Habit?, val tag: String?) {
+    var members = 0
+    var completed = 0
     val isHeader: Boolean
         get() = habit == null
 }
@@ -51,36 +54,48 @@ fun buildHabitListRows(
     collapsed: Set<String>,
     groupOrder: GroupOrder = GroupOrder.APPEARANCE
 ): List<HabitListRow> {
-    val rows = mutableListOf<HabitListRow>()
-    val tags = mutableListOf<String>()
+    // "" is the untagged group.
+    val membersByTag = mutableMapOf<String, Int>()
+    val completedByTag = mutableMapOf<String, Int>()
     for (habit in habits) {
-        for (tag in habit.tags) {
-            if (tag !in tags) tags.add(tag)
+        for (tag in if (habit.tags.isEmpty()) listOf("") else habit.tags) {
+            membersByTag[tag] = (membersByTag[tag] ?: 0) + 1
+            if (habit.isCompletedToday()) {
+                completedByTag[tag] = (completedByTag[tag] ?: 0) + 1
+            }
         }
     }
+    val tags = membersByTag.keys.filter { it.isNotEmpty() }.toMutableList()
     when (groupOrder) {
         GroupOrder.NAME -> tags.sortBy { it.lowercase() }
         GroupOrder.COMPLETION -> tags.sortByDescending { tag ->
-            // ponytail: O(tags x habits) recomputed per rebuild; fine for
-            // hundreds of habits, index it if the list ever gets huge.
-            val members = habits.filter { tag in it.tags }
-            if (members.isEmpty()) 0.0 else members.count { it.isCompletedToday() }.toDouble() / members.size
+            val members = membersByTag[tag]!!
+            val completed = completedByTag[tag] ?: 0
+            if (members == 0) 0.0 else completed.toDouble() / members
         }
         GroupOrder.APPEARANCE -> {}
     }
+    val rows = mutableListOf<HabitListRow>()
     for (tag in tags) {
-        rows.add(HabitListRow(null, tag))
+        val header = HabitListRow(null, tag)
+        header.members = membersByTag[tag]!!
+        header.completed = completedByTag[tag] ?: 0
+        rows.add(header)
         if (tag !in collapsed) {
             for (habit in habits) {
                 if (tag in habit.tags) rows.add(HabitListRow(habit, tag))
             }
         }
     }
-    val ungrouped = habits.filter { it.tags.isEmpty() }
-    if (ungrouped.isNotEmpty()) {
-        rows.add(HabitListRow(null, null))
+    if ("" in membersByTag) {
+        val header = HabitListRow(null, null)
+        header.members = membersByTag[""]!!
+        header.completed = completedByTag[""] ?: 0
+        rows.add(header)
         if (UNGROUPED_KEY !in collapsed) {
-            for (habit in ungrouped) rows.add(HabitListRow(habit, null))
+            for (habit in habits) {
+                if (habit.tags.isEmpty()) rows.add(HabitListRow(habit, null))
+            }
         }
     }
     return rows

@@ -103,4 +103,21 @@ class HabitListRowsTest : BaseUnitTest() {
         val rows = buildHabitListRows(listOf(pending, done), emptySet(), GroupOrder.COMPLETION)
         assertEquals(listOf("done", "done", "pending", "pending"), summary(rows))
     }
+
+    @Test
+    fun test_headerCounts() {
+        val done = habit(listOf("work")).apply {
+            originalEntries.add(Entry(getToday(), Entry.YES_MANUAL))
+            recompute()
+        }
+        val pending = habit(listOf("work"))
+        val untagged = habit(emptyList())
+        val rows = buildHabitListRows(listOf(done, pending, untagged), emptySet())
+        val header = rows.first { it.isHeader && it.tag == "work" }
+        assertEquals(2, header.members)
+        assertEquals(1, header.completed)
+        val ungroupedHeader = rows.first { it.isHeader && it.tag == null }
+        assertEquals(1, ungroupedHeader.members)
+        assertEquals(0, ungroupedHeader.completed)
+    }
 }

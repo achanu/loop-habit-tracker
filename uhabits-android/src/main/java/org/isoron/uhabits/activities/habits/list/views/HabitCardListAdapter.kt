@@ -197,16 +197,7 @@ class HabitCardListAdapter(
             header.tagView.text =
                 row.tag ?: listView!!.context.getString(R.string.ungrouped)
             header.chevron.rotation = if (key in collapsed) 0f else 90f
-            var members = 0
-            var completed = 0
-            for (habit in allHabits()) {
-                val belongs = if (row.tag == null) habit.tags.isEmpty() else row.tag in habit.tags
-                if (belongs) {
-                    members++
-                    if (habit.isCompletedToday()) completed++
-                }
-            }
-            header.progressView.text = "$completed/$members"
+            header.progressView.text = "${row.completed}/${row.members}"
             header.itemView.setOnClickListener { toggleGroup(key) }
             return
         }
@@ -264,13 +255,12 @@ class HabitCardListAdapter(
         onDataSetChanged()
     }
 
-    override fun onItemInserted(position: Int) {
-        onDataSetChanged()
-    }
+    // Insertions and moves are coalesced: they stream in one by one during a
+    // refresh, and rebuilding per notification made a full refresh O(n^2).
+    // The single rebuild in onRefreshFinished covers them.
+    override fun onItemInserted(position: Int) {}
 
-    override fun onItemMoved(oldPosition: Int, newPosition: Int) {
-        onDataSetChanged()
-    }
+    override fun onItemMoved(oldPosition: Int, newPosition: Int) {}
 
     override fun onItemRemoved(position: Int) {
         onDataSetChanged()

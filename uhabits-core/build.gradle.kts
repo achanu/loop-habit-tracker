@@ -27,11 +27,15 @@ kotlin {
     jvm()
     jvmToolchain(21)
 
-    js(IR) {
-        browser {
-            testTask {
-                useKarma {
-                    useChromeHeadless()
+    // The JS target only serves a browser experiment; pass -PwithJs to
+    // compile it. It slows down every build otherwise.
+    if (project.hasProperty("withJs")) {
+        js(IR) {
+            browser {
+                testTask {
+                    useKarma {
+                        useChromeHeadless()
+                    }
                 }
             }
         }
@@ -77,17 +81,19 @@ kotlin {
             }
         }
 
-        val jsMain by getting {
-            dependencies {
-                implementation(npm("sql.js", "1.11.0"))
-                implementation(npm("sprintf-js", "1.1.3"))
-                implementation(npm("jszip", "3.10.1"))
+        if (project.hasProperty("withJs")) {
+            val jsMain by getting {
+                dependencies {
+                    implementation(npm("sql.js", "1.11.0"))
+                    implementation(npm("sprintf-js", "1.1.3"))
+                    implementation(npm("jszip", "3.10.1"))
+                }
             }
-        }
 
-        val jsTest by getting {
-            dependencies {
-                implementation(kotlin("test-js"))
+            val jsTest by getting {
+                dependencies {
+                    implementation(kotlin("test-js"))
+                }
             }
         }
     }

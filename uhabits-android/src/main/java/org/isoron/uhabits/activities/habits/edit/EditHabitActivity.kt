@@ -404,7 +404,7 @@ class EditHabitActivity : AppCompatActivity() {
  * Suggests existing tags while the user types. Matches only the tag currently
  * being typed — the text after the last comma.
  */
-private class TagSuggestionAdapter(
+class TagSuggestionAdapter(
     context: Context,
     private val all: List<String>
 ) : ArrayAdapter<String>(context, android.R.layout.select_dialog_item, ArrayList(all)) {

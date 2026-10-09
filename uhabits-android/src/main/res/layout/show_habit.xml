@@ -52,18 +52,18 @@
                 style="@style/Card"
                 android:gravity="center" />
 
+            <LinearLayout
+                android:id="@+id/tagsCard"
+                style="@style/Card"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="8dp"
+                android:visibility="gone" />
+
             <org.isoron.uhabits.activities.habits.show.views.OverviewCardView
                 android:id="@+id/overviewCard"
                 style="@style/Card"
                 android:paddingTop="12dp" />
-
-            <TextView
-                android:id="@+id/tagsCard"
-                style="@style/Card"
-                android:gravity="center"
-                android:padding="12dp"
-                android:textSize="12sp"
-                android:visibility="gone" />
 
             <org.isoron.uhabits.activities.habits.show.views.TargetCardView
                 android:id="@+id/targetCard"

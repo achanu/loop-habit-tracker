@@ -20,11 +20,14 @@
 package org.isoron.uhabits.activities.habits.show
 
 import android.content.Context
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.widget.FrameLayout
+import android.widget.LinearLayout
+import android.widget.TextView
 import android.view.View.GONE
 import android.view.View.VISIBLE
-import org.isoron.uhabits.core.models.Habit
+import org.isoron.uhabits.R
 import org.isoron.uhabits.core.ui.screens.habits.show.ShowHabitPresenter
 import org.isoron.uhabits.core.ui.screens.habits.show.ShowHabitState
 import org.isoron.uhabits.databinding.ShowHabitBinding
@@ -34,6 +37,13 @@ import org.isoron.uhabits.utils.setupToolbar
 
 class ShowHabitView(context: Context) : FrameLayout(context) {
     private val binding = ShowHabitBinding.inflate(LayoutInflater.from(context))
+
+    interface TagListener {
+        fun onRemoveTag(tag: String)
+        fun onAddTag()
+    }
+
+    var tagListener: TagListener? = null
 
     init {
         binding.toolbar.applyToolbarInsets()
@@ -53,7 +63,15 @@ class ShowHabitView(context: Context) : FrameLayout(context) {
             binding.tagsCard.visibility = GONE
         } else {
             binding.tagsCard.visibility = VISIBLE
-            binding.tagsCard.text = Habit.joinTags(data.tags)
+            binding.tagsCard.removeAllViews()
+            for (tag in data.tags) {
+                binding.tagsCard.addView(
+                    chip(tag) { tagListener?.onRemoveTag(tag) }
+                )
+            }
+            binding.tagsCard.addView(
+                chip(context.getString(R.string.add_tag)) { tagListener?.onAddTag() }
+            )
         }
         binding.notesCard.setState(data.notes)
         binding.targetCard.setState(data.target)
@@ -68,6 +86,25 @@ class ShowHabitView(context: Context) : FrameLayout(context) {
             binding.targetCard.visibility = GONE
         }
         binding.linearLayout.applyBottomInset()
+    }
+
+    private fun chip(text: String, onClick: () -> Unit): TextView {
+        val view = TextView(context)
+        view.text = text
+        view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
+        view.setBackgroundResource(R.drawable.bg_tag_chip)
+        val pad = TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP, 8f, resources.displayMetrics
+        ).toInt()
+        view.setPadding(pad, pad / 2, pad, pad / 2)
+        view.setOnClickListener { onClick() }
+        val params = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        )
+        params.marginEnd = pad / 2
+        view.layoutParams = params
+        return view
     }
 
     fun setListener(presenter: ShowHabitPresenter) {

@@ -20,10 +20,14 @@ package org.isoron.uhabits.activities.habits.show
 
 import android.content.ContentUris
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.HapticFeedbackConstants
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.AutoCompleteTextView
+import android.widget.LinearLayout
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -38,9 +42,13 @@ import org.isoron.uhabits.activities.common.dialogs.CheckmarkDialog
 import org.isoron.uhabits.activities.common.dialogs.ConfirmDeleteDialog
 import org.isoron.uhabits.activities.common.dialogs.HistoryEditorDialog
 import org.isoron.uhabits.activities.common.dialogs.NumberDialog
+import org.isoron.uhabits.activities.habits.edit.TagSuggestionAdapter
 import org.isoron.uhabits.core.commands.Command
 import org.isoron.uhabits.core.commands.CommandRunner
+import org.isoron.uhabits.core.commands.EditHabitCommand
 import org.isoron.uhabits.core.models.Habit
+import org.isoron.uhabits.core.models.HabitList
+import org.isoron.uhabits.core.models.ModelFactory
 import org.isoron.uhabits.core.models.PaletteColor
 import org.isoron.uhabits.core.preferences.Preferences
 import org.isoron.uhabits.core.ui.callbacks.CheckMarkDialogCallback
@@ -64,6 +72,8 @@ class ShowHabitActivity : AppCompatActivity(), CommandRunner.Listener {
     private lateinit var menu: ShowHabitMenu
     private lateinit var view: ShowHabitView
     private lateinit var habit: Habit
+    private lateinit var habitList: HabitList
+    private lateinit var modelFactory: ModelFactory
     private lateinit var preferences: Preferences
     private lateinit var themeSwitcher: AndroidThemeSwitcher
     private lateinit var widgetUpdater: WidgetUpdater
@@ -76,11 +86,12 @@ class ShowHabitActivity : AppCompatActivity(), CommandRunner.Listener {
         super.onCreate(savedInstanceState)
 
         val appComponent = (applicationContext as HabitsApplication).component
-        val habitList = appComponent.habitList
+        habitList = appComponent.habitList
         habit = habitList.getById(ContentUris.parseId(intent.data!!))!!
         preferences = appComponent.preferences
         commandRunner = appComponent.commandRunner
         widgetUpdater = appComponent.widgetUpdater
+        modelFactory = appComponent.modelFactory
 
         themeSwitcher = AndroidThemeSwitcher(this, preferences)
         themeSwitcher.apply()
@@ -94,6 +105,16 @@ class ShowHabitActivity : AppCompatActivity(), CommandRunner.Listener {
         )
 
         view = ShowHabitView(this)
+
+        view.tagListener = object : ShowHabitView.TagListener {
+            override fun onRemoveTag(tag: String) {
+                editTags(habit.tags - tag)
+            }
+
+            override fun onAddTag() {
+                showAddTagDialog()
+            }
+        }
 
         val menuPresenter = ShowHabitMenuPresenter(
             commandRunner = commandRunner,
@@ -140,6 +161,42 @@ class ShowHabitActivity : AppCompatActivity(), CommandRunner.Listener {
 
     override fun onCommandFinished(command: Command) {
         screen.refresh()
+    }
+
+    private fun editTags(tags: List<String>) {
+        val modified = modelFactory.buildHabit()
+        modified.copyFrom(habit)
+        modified.tags = tags
+        commandRunner.run(EditHabitCommand(habitList, habit.id!!, modified))
+    }
+
+    private fun showAddTagDialog() {
+        val pad = TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP, 20f, resources.displayMetrics
+        ).toInt()
+        val input = AutoCompleteTextView(this)
+        input.hint = getString(R.string.tags_example)
+        input.setAdapter(
+            TagSuggestionAdapter(this, habitList.flatMap { it.tags }.distinct())
+        )
+        val container = LinearLayout(this)
+        container.setPadding(pad, pad / 2, pad, 0)
+        container.addView(
+            input,
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        )
+        AlertDialog.Builder(this)
+            .setTitle(R.string.add_tag)
+            .setView(container)
+            .setPositiveButton(R.string.save) { _, _ ->
+                val tag = input.text.trim().toString()
+                if (tag.isNotEmpty()) editTags((habit.tags + tag).distinct())
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 
     inner class Screen : ShowHabitMenuPresenter.Screen, ShowHabitPresenter.Screen {

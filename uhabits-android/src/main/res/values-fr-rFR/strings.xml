@@ -168,6 +168,7 @@
     <string name="sort_groups_by_name">Groupes : par nom</string>
     <string name="sort_groups_by_completion">Groupes : par complétion</string>
     <string name="ungrouped">Sans tags</string>
+    <string name="add_tag">Ajouter un tag</string>
     <string name="export">Exporter</string>
     <string name="long_press_to_edit">Appuyez et maintenez pour changer la valeur</string>
     <string name="value">Valeur</string>

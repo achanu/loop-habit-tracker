@@ -219,6 +219,16 @@ open class Preferences(private val storage: Storage) {
         }
 
     /**
+     * Comma-separated names of the tag groups currently collapsed on the
+     * habit list. Tags cannot contain commas, so the encoding is unambiguous.
+     */
+    open var collapsedGroups: String
+        get() = storage.getString("pref_collapsed_groups", "")
+        set(value) {
+            storage.putString("pref_collapsed_groups", value)
+        }
+
+    /**
      * @return An integer representing the first day of the week. Sunday
      * corresponds to 1, Monday to 2, and so on, until Saturday, which is
      * represented by 7. By default, this is based on the current system locale,

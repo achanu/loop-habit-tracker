@@ -201,6 +201,7 @@ class HabitCardListView(
             recyclerView: RecyclerView,
             viewHolder: ViewHolder
         ): Int {
+            if (viewHolder.itemViewType == HabitCardListAdapter.TYPE_HEADER) return 0
             return makeMovementFlags(UP or DOWN, START or END)
         }
 
@@ -209,6 +210,8 @@ class HabitCardListView(
             from: ViewHolder,
             to: ViewHolder
         ): Boolean {
+            if (from.itemViewType == HabitCardListAdapter.TYPE_HEADER) return false
+            if (to.itemViewType == HabitCardListAdapter.TYPE_HEADER) return false
             controller.value.drop(from.adapterPosition, to.adapterPosition)
             return true
         }

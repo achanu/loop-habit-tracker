@@ -18,9 +18,14 @@
  */
 package org.isoron.uhabits.activities.habits.list.views
 
+import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import me.tatarka.inject.annotations.Inject
+import org.isoron.uhabits.R
 import org.isoron.uhabits.activities.habits.list.MAX_CHECKMARK_COUNT
 import org.isoron.uhabits.core.models.Habit
 import org.isoron.uhabits.core.models.HabitList
@@ -28,18 +33,28 @@ import org.isoron.uhabits.core.models.HabitMatcher
 import org.isoron.uhabits.core.models.ModelObservable
 import org.isoron.uhabits.core.preferences.Preferences
 import org.isoron.uhabits.core.ui.screens.habits.list.HabitCardListCache
+import org.isoron.uhabits.core.ui.screens.habits.list.HabitListRow
 import org.isoron.uhabits.core.ui.screens.habits.list.ListHabitsMenuBehavior
 import org.isoron.uhabits.core.ui.screens.habits.list.ListHabitsSelectionMenuBehavior
+import org.isoron.uhabits.core.ui.screens.habits.list.buildHabitListRows
 import org.isoron.uhabits.core.utils.MidnightTimer
 import org.isoron.uhabits.inject.ActivityScope
 import java.util.LinkedList
+
+class GroupHeaderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    val tagView: TextView = itemView.findViewById(R.id.groupTag)
+    val chevron: ImageView = itemView.findViewById(R.id.groupChevron)
+}
 
 /**
  * Provides data that backs a [HabitCardListView].
  *
  *
- * The data if fetched and cached by a [HabitCardListCache]. This adapter
- * also holds a list of items that have been selected.
+ * The data if fetched and cached by a [HabitCardListCache]. The cache keeps a
+ * flat, position-indexed list of habits; this adapter expands it into display
+ * rows — one collapsible header per tag, followed by its habits. All positions
+ * arriving from the views (clicks, drags) are display positions and are
+ * translated back to flat positions before reaching the cache.
  */
 @Inject
 @ActivityScope
@@ -47,7 +62,7 @@ class HabitCardListAdapter(
     private val cache: HabitCardListCache,
     private val preferences: Preferences,
     private val midnightTimer: MidnightTimer
-) : RecyclerView.Adapter<HabitCardViewHolder?>(),
+) : RecyclerView.Adapter<RecyclerView.ViewHolder?>(),
     HabitCardListCache.Listener,
     MidnightTimer.MidnightListener,
     ListHabitsMenuBehavior.Adapter,
@@ -55,6 +70,9 @@ class HabitCardListAdapter(
     val observable: ModelObservable = ModelObservable()
     private var listView: HabitCardListView? = null
     val selected: LinkedList<Habit> = LinkedList()
+    private var rows: List<HabitListRow> = emptyList()
+    private val collapsed: MutableSet<String> =
+        preferences.collapsedGroups.split(',').filter { it.isNotEmpty() }.toMutableSet()
     override fun atMidnight() {
         cache.refreshAllHabits()
     }
@@ -83,22 +101,52 @@ class HabitCardListAdapter(
     }
 
     /**
-     * Returns the item that occupies a certain position on the list
+     * Returns the habit that occupies a certain position on the list, or null
+     * if the position holds a group header.
      *
      * @param position position of the item
-     * @return the item at given position or null if position is invalid
+     * @return the habit at given position or null if position is invalid
      */
     @Deprecated("")
     fun getItem(position: Int): Habit? {
-        return cache.getHabitByPosition(position)
+        return rows.getOrNull(position)?.habit
+    }
+
+    private fun rebuild() {
+        val habits = (0 until cache.habitCount).mapNotNull { cache.getHabitByPosition(it) }
+        rows = buildHabitListRows(habits, collapsed)
+    }
+
+    private fun flatPositionOf(habit: Habit): Int {
+        for (i in 0 until cache.habitCount) {
+            if (cache.getHabitByPosition(i) == habit) return i
+        }
+        return -1
+    }
+
+    /**
+     * Collapses or expands the group with the given tag.
+     */
+    fun toggleGroup(tag: String) {
+        if (!collapsed.remove(tag)) collapsed.add(tag)
+        preferences.collapsedGroups = collapsed.joinToString(",")
+        rebuild()
+        notifyDataSetChanged()
     }
 
     override fun getItemCount(): Int {
-        return cache.habitCount
+        return rows.size
     }
 
     override fun getItemId(position: Int): Long {
-        return getItem(position)!!.id!!
+        val row = rows[position]
+        // ponytail: a habit in multiple groups repeats its id; harmless while
+        // structural changes go through notifyDataSetChanged.
+        return if (row.isHeader) -(row.tag!!.hashCode().toLong() + 1) else row.habit!!.id!!
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        return if (rows[position].isHeader) TYPE_HEADER else TYPE_HABIT
     }
 
     /**
@@ -120,32 +168,52 @@ class HabitCardListAdapter(
     }
 
     override fun onBindViewHolder(
-        holder: HabitCardViewHolder,
+        holder: RecyclerView.ViewHolder,
         position: Int
     ) {
         if (listView == null) return
-        val habit = cache.getHabitByPosition(position)
-        val score = cache.getScore(habit!!.id!!)
+        val row = rows[position]
+        if (row.isHeader) {
+            val header = holder as GroupHeaderViewHolder
+            header.tagView.text = row.tag
+            header.chevron.rotation = if (row.tag!! in collapsed) 0f else 90f
+            header.itemView.setOnClickListener { toggleGroup(row.tag!!) }
+            return
+        }
+        val habit = row.habit!!
+        val cardHolder = holder as HabitCardViewHolder
+        val score = cache.getScore(habit.id!!)
         val checkmarks = cache.getCheckmarks(habit.id!!)
         val notes = cache.getNotes(habit.id!!)
         val selected = selected.contains(habit)
-        listView!!.bindCardView(holder, habit, score, checkmarks, notes, selected)
+        listView!!.bindCardView(cardHolder, habit, score, checkmarks, notes, selected)
     }
 
-    override fun onViewAttachedToWindow(holder: HabitCardViewHolder) {
-        listView!!.attachCardView(holder)
+    override fun onViewAttachedToWindow(holder: RecyclerView.ViewHolder) {
+        if (holder.itemViewType == TYPE_HEADER) return
+        listView!!.attachCardView(holder as HabitCardViewHolder)
     }
 
-    override fun onViewDetachedFromWindow(holder: HabitCardViewHolder) {
-        listView!!.detachCardView(holder)
+    override fun onViewDetachedFromWindow(holder: RecyclerView.ViewHolder) {
+        if (holder.itemViewType == TYPE_HEADER) return
+        listView!!.detachCardView(holder as HabitCardViewHolder)
     }
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
-    ): HabitCardViewHolder {
-        val view = listView!!.createHabitCardView()
-        return HabitCardViewHolder(view)
+    ): RecyclerView.ViewHolder {
+        return if (viewType == TYPE_HEADER) {
+            GroupHeaderViewHolder(
+                LayoutInflater.from(parent.context).inflate(
+                    R.layout.habit_group_header,
+                    parent,
+                    false
+                )
+            )
+        } else {
+            HabitCardViewHolder(listView!!.createHabitCardView())
+        }
     }
 
     /**
@@ -157,26 +225,32 @@ class HabitCardListAdapter(
     }
 
     override fun onItemChanged(position: Int) {
-        notifyItemChanged(position)
+        rebuild()
+        notifyDataSetChanged()
         observable.notifyListeners()
     }
 
     override fun onItemInserted(position: Int) {
-        notifyItemInserted(position)
+        rebuild()
+        notifyDataSetChanged()
         observable.notifyListeners()
     }
 
     override fun onItemMoved(oldPosition: Int, newPosition: Int) {
-        notifyItemMoved(oldPosition, newPosition)
+        rebuild()
+        notifyDataSetChanged()
         observable.notifyListeners()
     }
 
     override fun onItemRemoved(position: Int) {
-        notifyItemRemoved(position)
+        rebuild()
+        notifyDataSetChanged()
         observable.notifyListeners()
     }
 
     override fun onRefreshFinished() {
+        rebuild()
+        notifyDataSetChanged()
         observable.notifyListeners()
     }
 
@@ -206,11 +280,18 @@ class HabitCardListAdapter(
      * database operation to finish, the cache can be modified to reflect the
      * changes immediately.
      *
-     * @param from the habit that should be moved
-     * @param to   the habit that currently occupies the desired position
+     * @param from the display position of the habit that should be moved
+     * @param to   the display position of the habit currently at the target
      */
     fun performReorder(from: Int, to: Int) {
-        cache.reorder(from, to)
+        val fromHabit = rows.getOrNull(from)?.habit ?: return
+        val toHabit = rows.getOrNull(to)?.habit ?: return
+        val fromFlat = flatPositionOf(fromHabit)
+        val toFlat = flatPositionOf(toHabit)
+        if (fromFlat < 0 || toFlat < 0) return
+        cache.reorder(fromFlat, toFlat)
+        rebuild()
+        notifyDataSetChanged()
     }
 
     override fun refresh() {
@@ -223,7 +304,6 @@ class HabitCardListAdapter(
 
     /**
      * Sets the HabitCardListView that this adapter will provide data for.
-     *
      *
      * This object will be used to generated new HabitCardViews, upon demand.
      *
@@ -250,7 +330,7 @@ class HabitCardListAdapter(
     /**
      * Selects or deselects the item at a given position.
      *
-     * @param position position of the item to be toggled
+     * @param position the display position of the item to be toggled
      */
     fun toggleSelection(position: Int) {
         val h = getItem(position) ?: return
@@ -267,5 +347,10 @@ class HabitCardListAdapter(
         cache.secondaryOrder = preferences.defaultSecondaryOrder
         cache.primaryOrder = preferences.defaultPrimaryOrder
         setHasStableIds(true)
+    }
+
+    companion object {
+        const val TYPE_HABIT = 0
+        const val TYPE_HEADER = 1
     }
 }

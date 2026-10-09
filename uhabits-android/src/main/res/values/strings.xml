@@ -188,6 +188,8 @@
     <string name="add_tag">Add tag</string>
     <string name="tag_removed">Tag removed</string>
     <string name="undo">Undo</string>
+    <string name="rename_tag">Rename tag</string>
+    <string name="tag_added">Tag added to %d habits</string>
     <string name="export">Export</string>
     <string name="long_press_to_edit">Press-and-hold to change the value</string>
     <string name="value">Value</string>

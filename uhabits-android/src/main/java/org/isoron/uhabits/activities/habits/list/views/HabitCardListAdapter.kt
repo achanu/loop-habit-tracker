@@ -21,12 +21,17 @@ package org.isoron.uhabits.activities.habits.list.views
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import me.tatarka.inject.annotations.Inject
 import org.isoron.uhabits.R
 import org.isoron.uhabits.activities.habits.list.MAX_CHECKMARK_COUNT
+import org.isoron.uhabits.core.commands.CommandRunner
+import org.isoron.uhabits.core.commands.RenameTagCommand
 import org.isoron.uhabits.core.models.Habit
 import org.isoron.uhabits.core.models.HabitList
 import org.isoron.uhabits.core.models.HabitMatcher
@@ -64,7 +69,9 @@ class GroupHeaderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) 
 class HabitCardListAdapter(
     private val cache: HabitCardListCache,
     private val preferences: Preferences,
-    private val midnightTimer: MidnightTimer
+    private val midnightTimer: MidnightTimer,
+    private val habitList: HabitList,
+    private val commandRunner: CommandRunner
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder?>(),
     HabitCardListCache.Listener,
     MidnightTimer.MidnightListener,
@@ -148,6 +155,23 @@ class HabitCardListAdapter(
         notifyDataSetChanged()
     }
 
+    private fun showRenameTagDialog(tag: String) {
+        val input = EditText(listView!!.context)
+        input.setText(tag)
+        input.hint = listView!!.context.getString(R.string.tags_example)
+        AlertDialog.Builder(listView!!.context)
+            .setTitle(R.string.rename_tag)
+            .setView(input)
+            .setPositiveButton(R.string.save) { _, _ ->
+                val newTag = input.text.trim().toString()
+                if (newTag.isNotEmpty()) {
+                    commandRunner.run(RenameTagCommand(habitList, tag, newTag))
+                }
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
     override fun getItemCount(): Int {
         return rows.size
     }
@@ -199,6 +223,10 @@ class HabitCardListAdapter(
             header.chevron.rotation = if (key in collapsed) 0f else 90f
             header.progressView.text = "${row.completed}/${row.members}"
             header.itemView.setOnClickListener { toggleGroup(key) }
+            header.itemView.setOnLongClickListener {
+                if (row.tag != null) showRenameTagDialog(row.tag!!)
+                true
+            }
             return
         }
         val habit = row.habit!!

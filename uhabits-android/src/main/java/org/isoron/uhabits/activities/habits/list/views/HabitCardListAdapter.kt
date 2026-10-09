@@ -27,10 +27,13 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
 import me.tatarka.inject.annotations.Inject
 import org.isoron.uhabits.R
 import org.isoron.uhabits.activities.habits.list.MAX_CHECKMARK_COUNT
+import org.isoron.uhabits.core.commands.AddTagCommand
 import org.isoron.uhabits.core.commands.CommandRunner
+import org.isoron.uhabits.core.commands.RemoveTagCommand
 import org.isoron.uhabits.core.commands.RenameTagCommand
 import org.isoron.uhabits.core.models.Habit
 import org.isoron.uhabits.core.models.HabitList
@@ -156,10 +159,11 @@ class HabitCardListAdapter(
     }
 
     private fun showRenameTagDialog(tag: String) {
-        val input = EditText(listView!!.context)
+        val context = listView!!.context
+        val input = EditText(context)
         input.setText(tag)
-        input.hint = listView!!.context.getString(R.string.tags_example)
-        AlertDialog.Builder(listView!!.context)
+        input.hint = context.getString(R.string.tags_example)
+        AlertDialog.Builder(context)
             .setTitle(R.string.rename_tag)
             .setView(input)
             .setPositiveButton(R.string.save) { _, _ ->
@@ -167,6 +171,17 @@ class HabitCardListAdapter(
                 if (newTag.isNotEmpty()) {
                     commandRunner.run(RenameTagCommand(habitList, tag, newTag))
                 }
+            }
+            .setNeutralButton(R.string.delete_tag) { _, _ ->
+                val targets = habitList.filter { tag in it.tags }
+                commandRunner.run(RemoveTagCommand(habitList, targets, tag))
+                Snackbar.make(
+                    listView!!,
+                    context.getString(R.string.tag_removed),
+                    Snackbar.LENGTH_SHORT
+                ).setAction(R.string.undo) {
+                    commandRunner.run(AddTagCommand(habitList, targets, tag))
+                }.show()
             }
             .setNegativeButton(android.R.string.cancel, null)
             .show()

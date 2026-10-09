@@ -28,6 +28,7 @@ import android.widget.TextView
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import org.isoron.uhabits.R
+import org.isoron.uhabits.activities.common.dialogs.tagChipView
 import org.isoron.uhabits.core.ui.screens.habits.show.ShowHabitPresenter
 import org.isoron.uhabits.core.ui.screens.habits.show.ShowHabitState
 import org.isoron.uhabits.databinding.ShowHabitBinding
@@ -89,20 +90,14 @@ class ShowHabitView(context: Context) : FrameLayout(context) {
     }
 
     private fun chip(text: String, onClick: () -> Unit): TextView {
-        val view = TextView(context)
-        view.text = text
-        view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
-        view.setBackgroundResource(R.drawable.bg_tag_chip)
-        val pad = TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP, 8f, resources.displayMetrics
-        ).toInt()
-        view.setPadding(pad, pad / 2, pad, pad / 2)
-        view.setOnClickListener { onClick() }
+        val view = tagChipView(context, text, onClick)
         val params = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.WRAP_CONTENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
         )
-        params.marginEnd = pad / 2
+        params.marginEnd = TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP, 4f, resources.displayMetrics
+        ).toInt()
         view.layoutParams = params
         return view
     }

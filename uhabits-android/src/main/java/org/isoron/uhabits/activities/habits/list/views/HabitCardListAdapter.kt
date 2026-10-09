@@ -43,6 +43,7 @@ import java.util.LinkedList
 
 class GroupHeaderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     val tagView: TextView = itemView.findViewById(R.id.groupTag)
+    val progressView: TextView = itemView.findViewById(R.id.groupProgress)
     val chevron: ImageView = itemView.findViewById(R.id.groupChevron)
 }
 
@@ -177,6 +178,16 @@ class HabitCardListAdapter(
             val header = holder as GroupHeaderViewHolder
             header.tagView.text = row.tag
             header.chevron.rotation = if (row.tag!! in collapsed) 0f else 90f
+            var members = 0
+            var completed = 0
+            for (i in 0 until cache.habitCount) {
+                val habit = cache.getHabitByPosition(i) ?: continue
+                if (row.tag in habit.tags) {
+                    members++
+                    if (habit.isCompletedToday()) completed++
+                }
+            }
+            header.progressView.text = "$completed/$members"
             header.itemView.setOnClickListener { toggleGroup(row.tag!!) }
             return
         }

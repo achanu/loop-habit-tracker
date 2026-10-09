@@ -18,6 +18,13 @@
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textStyle="bold" />
 
+    <TextView
+        android:id="@+id/groupProgress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
     <ImageView
         android:id="@+id/groupChevron"
         android:layout_width="20dp"

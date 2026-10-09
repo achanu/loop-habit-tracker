@@ -18,7 +18,9 @@
  */
 package org.isoron.uhabits.core.ui.screens.habits.list
 
+import org.isoron.platform.time.getToday
 import org.isoron.uhabits.core.BaseUnitTest
+import org.isoron.uhabits.core.models.Entry
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -28,9 +30,24 @@ class HabitListRowsTest : BaseUnitTest() {
     private fun habit(tags: List<String>) =
         modelFactory.buildHabit().apply { this.tags = tags }
 
+    /** One symbol per row: "?", "·" (untagged habit) or the tag. */
+    private fun summary(rows: List<HabitListRow>) = rows.map {
+        when {
+            it.isHeader -> it.tag ?: "?"
+            it.habit!!.tags.isEmpty() -> "·"
+            else -> it.tag!!
+        }
+    }
+
     @Test
     fun test_emptyList() {
         assertEquals(0, buildHabitListRows(emptyList(), emptySet()).size)
+    }
+
+    @Test
+    fun test_noTags_noUnnamedGroup() {
+        val rows = buildHabitListRows(listOf(habit(listOf("work"))), emptySet())
+        assertEquals(listOf("work", "work"), summary(rows))
     }
 
     @Test
@@ -39,18 +56,51 @@ class HabitListRowsTest : BaseUnitTest() {
         val b = habit(listOf("work"))
         val c = habit(listOf("work", "health"))
         val rows = buildHabitListRows(listOf(a, b, c), emptySet())
-        val summary = rows.map { it.tag ?: it.habit!!.tags.firstOrNull() ?: "ungrouped" }
-        assertEquals(listOf("ungrouped", "work", "work", "work", "health", "health"), summary)
-        assertTrue(rows[1].isHeader)
-        assertFalse(rows[2].isHeader)
+        assertEquals(listOf("work", "work", "work", "health", "health", "?", "·"), summary(rows))
+        assertTrue(rows[0].isHeader)
+        assertFalse(rows[1].isHeader)
     }
 
     @Test
-    fun test_collapsedAndOrderOfAppearance() {
+    fun test_collapsed() {
         val a = habit(listOf("b", "a"))
         val b = habit(listOf("a"))
         val rows = buildHabitListRows(listOf(a, b), setOf("b"))
-        val summary = rows.map { it.tag ?: "?" }
-        assertEquals(listOf("b", "a", "a", "a"), summary)
+        assertEquals(listOf("b", "a", "a", "a"), summary(rows))
+    }
+
+    @Test
+    fun test_collapsedUnnamedGroup() {
+        val a = habit(emptyList())
+        val b = habit(listOf("work"))
+        val rows = buildHabitListRows(listOf(a, b), setOf(UNGROUPED_KEY))
+        assertEquals(listOf("work", "work", "?"), summary(rows))
+    }
+
+    @Test
+    fun test_groupOrderByName() {
+        val a = habit(listOf("zoo"))
+        val b = habit(listOf("Alpha"))
+        val rows = buildHabitListRows(listOf(a, b), emptySet(), GroupOrder.NAME)
+        assertEquals(listOf("Alpha", "Alpha", "zoo", "zoo"), summary(rows))
+    }
+
+    @Test
+    fun test_groupOrderAppearance() {
+        val a = habit(listOf("zoo"))
+        val b = habit(listOf("Alpha"))
+        val rows = buildHabitListRows(listOf(a, b), emptySet(), GroupOrder.APPEARANCE)
+        assertEquals(listOf("zoo", "zoo", "Alpha", "Alpha"), summary(rows))
+    }
+
+    @Test
+    fun test_groupOrderByCompletion() {
+        val done = habit(listOf("done")).apply {
+            originalEntries.add(Entry(getToday(), Entry.YES_MANUAL))
+            recompute()
+        }
+        val pending = habit(listOf("pending"))
+        val rows = buildHabitListRows(listOf(pending, done), emptySet(), GroupOrder.COMPLETION)
+        assertEquals(listOf("done", "done", "pending", "pending"), summary(rows))
     }
 }

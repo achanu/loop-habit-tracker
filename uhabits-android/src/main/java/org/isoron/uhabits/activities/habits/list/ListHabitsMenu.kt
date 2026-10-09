@@ -30,6 +30,7 @@ import org.isoron.uhabits.R
 import org.isoron.uhabits.core.models.HabitList
 import org.isoron.uhabits.core.preferences.Preferences
 import org.isoron.uhabits.core.ui.ThemeSwitcher
+import org.isoron.uhabits.core.ui.screens.habits.list.GroupOrder
 import org.isoron.uhabits.core.ui.screens.habits.list.ListHabitsMenuBehavior
 import org.isoron.uhabits.inject.ActivityContext
 import org.isoron.uhabits.inject.ActivityScope
@@ -114,6 +115,13 @@ class ListHabitsMenu(
             HabitList.Order.BY_STATUS_DESC -> sortStatus.icon = arrowUp
             HabitList.Order.BY_POSITION -> sortManual.icon = arrowUp
         }
+        val groupSortName = menu.findItem(R.id.actionSortGroupsByName)
+        val groupSortCompletion = menu.findItem(R.id.actionSortGroupsByCompletion)
+        when (behavior.groupOrder) {
+            GroupOrder.NAME -> groupSortName.isChecked = true
+            GroupOrder.COMPLETION -> groupSortCompletion.isChecked = true
+            GroupOrder.APPEARANCE -> {}
+        }
     }
 
     fun onItemSelected(item: MenuItem): Boolean {
@@ -177,6 +185,18 @@ class ListHabitsMenu(
 
             R.id.actionSortStatus -> {
                 behavior.onSortByStatus()
+                return true
+            }
+
+            R.id.actionSortGroupsByName -> {
+                behavior.onSortGroupsByName()
+                activity.invalidateOptionsMenu()
+                return true
+            }
+
+            R.id.actionSortGroupsByCompletion -> {
+                behavior.onSortGroupsByCompletion()
+                activity.invalidateOptionsMenu()
                 return true
             }
 

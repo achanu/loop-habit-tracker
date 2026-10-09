@@ -89,6 +89,17 @@ class ListHabitsMenuBehavior(
         onSortToggleBy(HabitList.Order.BY_STATUS_ASC, HabitList.Order.BY_STATUS_DESC)
     }
 
+    fun onSortGroupsByName() {
+        adapter.groupOrder = GroupOrder.NAME
+    }
+
+    fun onSortGroupsByCompletion() {
+        adapter.groupOrder = GroupOrder.COMPLETION
+    }
+
+    val groupOrder: GroupOrder
+        get() = adapter.groupOrder
+
     private fun onSortToggleBy(defaultOrder: HabitList.Order, reversedOrder: HabitList.Order) {
         if (adapter.primaryOrder != defaultOrder) {
             if (adapter.primaryOrder != reversedOrder) {
@@ -135,6 +146,7 @@ class ListHabitsMenuBehavior(
         fun setFilter(matcher: HabitMatcher)
         var primaryOrder: HabitList.Order
         var secondaryOrder: HabitList.Order
+        var groupOrder: GroupOrder
     }
 
     interface Screen {

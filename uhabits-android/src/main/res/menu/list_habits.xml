@@ -75,6 +75,14 @@
                         <item
                             android:id="@+id/actionSortStatus"
                             android:title="@string/by_status"/>
+                        <item
+                            android:id="@+id/actionSortGroupsByName"
+                            android:title="@string/sort_groups_by_name"
+                            android:checkable="true"/>
+                        <item
+                            android:id="@+id/actionSortGroupsByCompletion"
+                            android:title="@string/sort_groups_by_completion"
+                            android:checkable="true"/>
                     </menu>
                 </item>
                 <item

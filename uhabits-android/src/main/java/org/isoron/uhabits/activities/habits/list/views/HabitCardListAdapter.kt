@@ -32,10 +32,12 @@ import org.isoron.uhabits.core.models.HabitList
 import org.isoron.uhabits.core.models.HabitMatcher
 import org.isoron.uhabits.core.models.ModelObservable
 import org.isoron.uhabits.core.preferences.Preferences
+import org.isoron.uhabits.core.ui.screens.habits.list.GroupOrder
 import org.isoron.uhabits.core.ui.screens.habits.list.HabitCardListCache
 import org.isoron.uhabits.core.ui.screens.habits.list.HabitListRow
 import org.isoron.uhabits.core.ui.screens.habits.list.ListHabitsMenuBehavior
 import org.isoron.uhabits.core.ui.screens.habits.list.ListHabitsSelectionMenuBehavior
+import org.isoron.uhabits.core.ui.screens.habits.list.UNGROUPED_KEY
 import org.isoron.uhabits.core.ui.screens.habits.list.buildHabitListRows
 import org.isoron.uhabits.core.utils.MidnightTimer
 import org.isoron.uhabits.inject.ActivityScope
@@ -113,10 +115,21 @@ class HabitCardListAdapter(
         return rows.getOrNull(position)?.habit
     }
 
+    private fun allHabits(): List<Habit> =
+        (0 until cache.habitCount).mapNotNull { cache.getHabitByPosition(it) }
+
     private fun rebuild() {
-        val habits = (0 until cache.habitCount).mapNotNull { cache.getHabitByPosition(it) }
-        rows = buildHabitListRows(habits, collapsed)
+        rows = buildHabitListRows(allHabits(), collapsed, groupOrder)
     }
+
+    override var groupOrder: GroupOrder
+        get() = runCatching { GroupOrder.valueOf(preferences.groupSort) }
+            .getOrDefault(GroupOrder.APPEARANCE)
+        set(value) {
+            preferences.groupSort = value.name
+            rebuild()
+            notifyDataSetChanged()
+        }
 
     private fun flatPositionOf(habit: Habit): Int {
         for (i in 0 until cache.habitCount) {
@@ -143,7 +156,11 @@ class HabitCardListAdapter(
         val row = rows[position]
         // ponytail: a habit in multiple groups repeats its id; harmless while
         // structural changes go through notifyDataSetChanged.
-        return if (row.isHeader) -(row.tag!!.hashCode().toLong() + 1) else row.habit!!.id!!
+        return if (row.isHeader) {
+            -((row.tag ?: UNGROUPED_KEY).hashCode().toLong() + 1)
+        } else {
+            row.habit!!.id!!
+        }
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -176,19 +193,21 @@ class HabitCardListAdapter(
         val row = rows[position]
         if (row.isHeader) {
             val header = holder as GroupHeaderViewHolder
-            header.tagView.text = row.tag
-            header.chevron.rotation = if (row.tag!! in collapsed) 0f else 90f
+            val key = row.tag ?: UNGROUPED_KEY
+            header.tagView.text =
+                row.tag ?: listView!!.context.getString(R.string.ungrouped)
+            header.chevron.rotation = if (key in collapsed) 0f else 90f
             var members = 0
             var completed = 0
-            for (i in 0 until cache.habitCount) {
-                val habit = cache.getHabitByPosition(i) ?: continue
-                if (row.tag in habit.tags) {
+            for (habit in allHabits()) {
+                val belongs = if (row.tag == null) habit.tags.isEmpty() else row.tag in habit.tags
+                if (belongs) {
                     members++
                     if (habit.isCompletedToday()) completed++
                 }
             }
             header.progressView.text = "$completed/$members"
-            header.itemView.setOnClickListener { toggleGroup(row.tag!!) }
+            header.itemView.setOnClickListener { toggleGroup(key) }
             return
         }
         val habit = row.habit!!
@@ -235,34 +254,30 @@ class HabitCardListAdapter(
         midnightTimer.removeListener(this)
     }
 
-    override fun onItemChanged(position: Int) {
+    private fun onDataSetChanged() {
         rebuild()
         notifyDataSetChanged()
         observable.notifyListeners()
+    }
+
+    override fun onItemChanged(position: Int) {
+        onDataSetChanged()
     }
 
     override fun onItemInserted(position: Int) {
-        rebuild()
-        notifyDataSetChanged()
-        observable.notifyListeners()
+        onDataSetChanged()
     }
 
     override fun onItemMoved(oldPosition: Int, newPosition: Int) {
-        rebuild()
-        notifyDataSetChanged()
-        observable.notifyListeners()
+        onDataSetChanged()
     }
 
     override fun onItemRemoved(position: Int) {
-        rebuild()
-        notifyDataSetChanged()
-        observable.notifyListeners()
+        onDataSetChanged()
     }
 
     override fun onRefreshFinished() {
-        rebuild()
-        notifyDataSetChanged()
-        observable.notifyListeners()
+        onDataSetChanged()
     }
 
     /**

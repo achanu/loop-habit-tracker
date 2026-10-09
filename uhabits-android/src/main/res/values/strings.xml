@@ -182,6 +182,9 @@
     <string name="by_color">By color</string>
     <string name="by_score">By score</string>
     <string name="by_status">By status</string>
+    <string name="sort_groups_by_name">Groups: by name</string>
+    <string name="sort_groups_by_completion">Groups: by completion</string>
+    <string name="ungrouped">No tags</string>
     <string name="export">Export</string>
     <string name="long_press_to_edit">Press-and-hold to change the value</string>
     <string name="value">Value</string>

@@ -228,6 +228,13 @@ open class Preferences(private val storage: Storage) {
             storage.putString("pref_collapsed_groups", value)
         }
 
+    /** How the tag groups are ordered: "appearance", "name" or "completion". */
+    open var groupSort: String
+        get() = storage.getString("pref_group_sort", "appearance")
+        set(value) {
+            storage.putString("pref_group_sort", value)
+        }
+
     /**
      * @return An integer representing the first day of the week. Sunday
      * corresponds to 1, Monday to 2, and so on, until Saturday, which is

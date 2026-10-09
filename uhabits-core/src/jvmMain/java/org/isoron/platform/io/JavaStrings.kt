@@ -16,14 +16,17 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.isoron.platform.io
 
+import java.util.Locale
+
+// Locale.US matches the JS implementation and makes CSV output and the
+// formatter stable regardless of the device locale.
 actual fun format(format: String, arg: String): String =
-    String.format(format, arg)
+    String.format(Locale.US, format, arg)
 
 actual fun format(format: String, arg: Int): String =
-    String.format(format, arg)
+    String.format(Locale.US, format, arg)
 
 actual fun format(format: String, arg: Double): String =
-    String.format(format, arg)
+    String.format(Locale.US, format, arg)

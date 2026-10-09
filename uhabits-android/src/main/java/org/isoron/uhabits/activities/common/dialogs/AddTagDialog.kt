@@ -139,7 +139,9 @@ fun showAddTagDialog(
         for (tag in existingTags) {
             cloud.addView(
                 tagChipView(context, tag) {
-                    input.setText(Habit.appendTagInput(input.text.toString(), tag))
+                    val text = input.text.toString()
+                    if (tag in Habit.parseTags(text)) return@tagChipView
+                    input.setText(Habit.appendTagInput(text, tag))
                     input.setSelection(input.text.length)
                 }
             )

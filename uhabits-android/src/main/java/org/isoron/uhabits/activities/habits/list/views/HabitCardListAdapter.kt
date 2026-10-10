@@ -246,7 +246,9 @@ class HabitCardListAdapter(
             val key = row.tag ?: UNGROUPED_KEY
             header.tagView.text =
                 row.tag ?: listView!!.context.getString(R.string.ungrouped)
-            header.ring.setPercentage((row.score * 100).toFloat())
+            header.ring.setPercentage(
+                if (row.members == 0) 0f else row.completed * 100f / row.members
+            )
             header.ring.setColor(StyledResources(listView!!.context).getColor(R.attr.contrast100))
             header.chevron.rotation = if (key in collapsed) 0f else 90f
             header.progressView.text = "${row.completed}/${row.members}"

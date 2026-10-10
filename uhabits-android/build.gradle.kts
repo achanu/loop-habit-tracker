@@ -125,6 +125,7 @@ dependencies {
     androidTestImplementation(libs.espresso.contrib)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.junit)
+    androidTestImplementation(libs.hamcrest)
     androidTestImplementation(libs.ktor.client.mock)
     androidTestImplementation(libs.ktor.jackson)
     androidTestImplementation(libs.rules)

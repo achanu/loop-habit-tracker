@@ -116,8 +116,10 @@ class HabitListRowsTest : BaseUnitTest() {
         val header = rows.first { it.isHeader && it.tag == "work" }
         assertEquals(2, header.members)
         assertEquals(1, header.completed)
+        assertTrue(header.score > 0.0)
         val ungroupedHeader = rows.first { it.isHeader && it.tag == null }
         assertEquals(1, ungroupedHeader.members)
         assertEquals(0, ungroupedHeader.completed)
+        assertEquals(0.0, ungroupedHeader.score)
     }
 }

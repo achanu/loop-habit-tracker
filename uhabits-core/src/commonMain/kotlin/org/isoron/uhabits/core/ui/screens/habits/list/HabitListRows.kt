@@ -18,6 +18,7 @@
  */
 package org.isoron.uhabits.core.ui.screens.habits.list
 
+import org.isoron.platform.time.getToday
 import org.isoron.uhabits.core.models.Habit
 
 /**
@@ -29,6 +30,7 @@ import org.isoron.uhabits.core.models.Habit
 class HabitListRow(val habit: Habit?, val tag: String?) {
     var members = 0
     var completed = 0
+    var score = 0.0
     val isHeader: Boolean
         get() = habit == null
 }
@@ -80,6 +82,9 @@ fun buildHabitListRows(
         val header = HabitListRow(null, tag)
         header.members = membersByTag[tag]!!
         header.completed = completedByTag[tag] ?: 0
+        header.score = habits.filter { tag in it.tags }
+            .map { it.scores[getToday()].value }
+            .average()
         rows.add(header)
         if (tag !in collapsed) {
             for (habit in habits) {
@@ -91,6 +96,9 @@ fun buildHabitListRows(
         val header = HabitListRow(null, null)
         header.members = membersByTag[""]!!
         header.completed = completedByTag[""] ?: 0
+        header.score = habits.filter { it.tags.isEmpty() }
+            .map { it.scores[getToday()].value }
+            .average()
         rows.add(header)
         if (UNGROUPED_KEY !in collapsed) {
             for (habit in habits) {

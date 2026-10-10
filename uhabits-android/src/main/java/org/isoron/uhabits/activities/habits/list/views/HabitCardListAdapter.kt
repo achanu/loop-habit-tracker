@@ -168,8 +168,15 @@ class HabitCardListAdapter(
             .setView(input)
             .setPositiveButton(R.string.save) { _, _ ->
                 val newTag = input.text.trim().toString()
-                if (newTag.isNotEmpty()) {
+                if (newTag.isNotEmpty() && newTag != tag) {
                     commandRunner.run(RenameTagCommand(habitList, tag, newTag))
+                    Snackbar.make(
+                        listView!!,
+                        context.getString(R.string.tag_renamed),
+                        Snackbar.LENGTH_SHORT
+                    ).setAction(R.string.undo) {
+                        commandRunner.run(RenameTagCommand(habitList, newTag, tag))
+                    }.show()
                 }
             }
             .setNeutralButton(R.string.delete_tag) { _, _ ->
@@ -236,7 +243,8 @@ class HabitCardListAdapter(
             header.tagView.text =
                 row.tag ?: listView!!.context.getString(R.string.ungrouped)
             header.chevron.rotation = if (key in collapsed) 0f else 90f
-            header.progressView.text = "${row.completed}/${row.members}"
+            header.progressView.text =
+                "${row.completed}/${row.members} · ${(row.score * 100).toInt()}%"
             header.itemView.setOnClickListener { toggleGroup(key) }
             header.itemView.setOnLongClickListener {
                 if (row.tag != null) showRenameTagDialog(row.tag!!)

@@ -173,6 +173,7 @@
     <string name="undo">Annuler</string>
     <string name="rename_tag">Renommer le tag</string>
     <string name="delete_tag">Supprimer le tag</string>
+    <string name="tag_renamed">Tag renommé</string>
     <string name="tag_added">Tag ajouté à %d habitudes</string>
     <string name="export">Exporter</string>
     <string name="long_press_to_edit">Appuyez et maintenez pour changer la valeur</string>

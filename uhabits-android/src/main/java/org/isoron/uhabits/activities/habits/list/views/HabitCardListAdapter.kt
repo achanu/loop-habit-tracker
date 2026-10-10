@@ -49,9 +49,12 @@ import org.isoron.uhabits.core.ui.screens.habits.list.UNGROUPED_KEY
 import org.isoron.uhabits.core.ui.screens.habits.list.buildHabitListRows
 import org.isoron.uhabits.core.utils.MidnightTimer
 import org.isoron.uhabits.inject.ActivityScope
+import org.isoron.uhabits.utils.StyledResources
+import org.isoron.uhabits.activities.common.views.RingView
 import java.util.LinkedList
 
 class GroupHeaderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    val ring: RingView = itemView.findViewById(R.id.groupRing)
     val tagView: TextView = itemView.findViewById(R.id.groupTag)
     val progressView: TextView = itemView.findViewById(R.id.groupProgress)
     val chevron: ImageView = itemView.findViewById(R.id.groupChevron)
@@ -242,9 +245,10 @@ class HabitCardListAdapter(
             val key = row.tag ?: UNGROUPED_KEY
             header.tagView.text =
                 row.tag ?: listView!!.context.getString(R.string.ungrouped)
+            header.ring.setPercentage((row.score * 100).toFloat())
+            header.ring.setColor(StyledResources(listView!!.context).getColor(R.attr.contrast60))
             header.chevron.rotation = if (key in collapsed) 0f else 90f
-            header.progressView.text =
-                "${row.completed}/${row.members} · ${(row.score * 100).toInt()}%"
+            header.progressView.text = "${row.completed}/${row.members}"
             header.itemView.setOnClickListener { toggleGroup(key) }
             header.itemView.setOnLongClickListener {
                 if (row.tag != null) showRenameTagDialog(row.tag!!)

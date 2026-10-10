@@ -8,6 +8,12 @@
     android:paddingStart="16dp"
     android:paddingEnd="16dp">
 
+    <org.isoron.uhabits.activities.common.views.RingView
+        android:id="@+id/groupRing"
+        android:layout_width="22dp"
+        android:layout_height="22dp"
+        android:layout_marginEnd="8dp" />
+
     <TextView
         android:id="@+id/groupTag"
         android:layout_width="0dp"

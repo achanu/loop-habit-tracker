@@ -18,6 +18,7 @@
  */
 package org.isoron.uhabits.activities.habits.list.views
 
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -246,7 +247,7 @@ class HabitCardListAdapter(
             header.tagView.text =
                 row.tag ?: listView!!.context.getString(R.string.ungrouped)
             header.ring.setPercentage((row.score * 100).toFloat())
-            header.ring.setColor(StyledResources(listView!!.context).getColor(R.attr.contrast60))
+            header.ring.setColor(StyledResources(listView!!.context).getColor(R.attr.contrast100))
             header.chevron.rotation = if (key in collapsed) 0f else 90f
             header.progressView.text = "${row.completed}/${row.members}"
             header.itemView.setOnClickListener { toggleGroup(key) }
@@ -286,7 +287,13 @@ class HabitCardListAdapter(
                     parent,
                     false
                 )
-            )
+            ).also { holder ->
+                holder.ring.setThickness(
+                    TypedValue.applyDimension(
+                        TypedValue.COMPLEX_UNIT_DIP, 2f, parent.resources.displayMetrics
+                    )
+                )
+            }
         } else {
             HabitCardViewHolder(listView!!.createHabitCardView())
         }

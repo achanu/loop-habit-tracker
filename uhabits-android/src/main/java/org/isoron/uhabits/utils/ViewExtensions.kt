@@ -22,6 +22,8 @@ package org.isoron.uhabits.utils
 import android.app.Activity
 import android.app.Dialog
 import android.content.ActivityNotFoundException
+import android.content.Context
+import android.util.TypedValue
 import android.content.Intent
 import android.graphics.Canvas
 import android.graphics.Color
@@ -289,3 +291,10 @@ fun View.applyToolbarInsets() {
         insets
     }
 }
+
+fun Context.dp(value: Float): Int =
+    TypedValue.applyDimension(
+        TypedValue.COMPLEX_UNIT_DIP,
+        value,
+        resources.displayMetrics
+    ).toInt()

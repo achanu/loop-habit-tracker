@@ -20,6 +20,7 @@ package org.isoron.uhabits.activities.common.dialogs
 
 import android.content.Context
 import android.util.TypedValue
+import org.isoron.uhabits.utils.dp
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
@@ -30,17 +31,13 @@ import androidx.appcompat.app.AlertDialog
 import org.isoron.uhabits.R
 import org.isoron.uhabits.core.models.Habit
 
-private fun dp(context: Context, value: Float): Int =
-    TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, value, context.resources.displayMetrics)
-        .toInt()
-
 /** A small tappable tag chip, as used in the detail view and dialogs. */
-fun tagChipView(context: Context, text: String, onClick: () -> Unit): TextView {
+fun tagChipView(context: Context, text: String, onClick: () -> Unit = {}): TextView {
     val view = TextView(context)
     view.text = text
     view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
     view.setBackgroundResource(R.drawable.bg_tag_chip)
-    val pad = dp(context, 8f)
+    val pad = context.dp(8f)
     view.setPadding(pad, pad / 2, pad, pad / 2)
     view.setOnClickListener { onClick() }
     return view
@@ -48,7 +45,7 @@ fun tagChipView(context: Context, text: String, onClick: () -> Unit): TextView {
 
 /** Wraps its children into rows; used to lay out tag chips. */
 private class TagFlowLayout(context: Context) : ViewGroup(context) {
-    private val spacing = dp(context, 8f)
+    private val spacing = context.dp(8f)
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val maxWidth = MeasureSpec.getSize(widthMeasureSpec)
@@ -130,7 +127,7 @@ fun showAddTagDialog(
     input.hint = context.getString(R.string.tags_example)
     input.setAdapter(TagSuggestionAdapter(context, existingTags))
 
-    val pad = dp(context, 20f)
+    val pad = context.dp(20f)
     val container = LinearLayout(context)
     container.orientation = LinearLayout.VERTICAL
     container.setPadding(pad, pad / 2, pad, 0)
@@ -138,7 +135,7 @@ fun showAddTagDialog(
     if (existingTags.isNotEmpty()) {
         val cloud = TagFlowLayout(context)
         for (tag in existingTags) {
-            val chip = tagChipView(context, tag) {}
+            val chip = tagChipView(context, tag)
             chip.setOnClickListener {
                 chip.isSelected = !chip.isSelected
                 if (chip.isSelected) selected.add(tag) else selected.remove(tag)
@@ -146,7 +143,7 @@ fun showAddTagDialog(
             cloud.addView(chip)
         }
         container.addView(cloud, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
-        input.setPadding(0, dp(context, 8f), 0, 0)
+        input.setPadding(0, context.dp(8f), 0, 0)
     }
     container.addView(
         input,

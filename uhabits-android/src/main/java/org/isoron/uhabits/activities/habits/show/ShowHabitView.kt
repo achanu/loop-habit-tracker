@@ -20,7 +20,6 @@
 package org.isoron.uhabits.activities.habits.show
 
 import android.content.Context
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.widget.FrameLayout
 import android.widget.LinearLayout
@@ -30,6 +29,7 @@ import android.view.View.VISIBLE
 import org.isoron.uhabits.R
 import org.isoron.uhabits.activities.common.dialogs.tagChipView
 import org.isoron.uhabits.core.ui.screens.habits.show.ShowHabitPresenter
+import org.isoron.uhabits.utils.dp
 import org.isoron.uhabits.core.ui.screens.habits.show.ShowHabitState
 import org.isoron.uhabits.databinding.ShowHabitBinding
 import org.isoron.uhabits.utils.applyBottomInset
@@ -95,9 +95,7 @@ class ShowHabitView(context: Context) : FrameLayout(context) {
             LinearLayout.LayoutParams.WRAP_CONTENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
         )
-        params.marginEnd = TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP, 4f, resources.displayMetrics
-        ).toInt()
+        params.marginEnd = context.dp(4f)
         view.layoutParams = params
         return view
     }

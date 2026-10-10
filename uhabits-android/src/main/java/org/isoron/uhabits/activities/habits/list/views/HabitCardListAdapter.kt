@@ -18,7 +18,6 @@
  */
 package org.isoron.uhabits.activities.habits.list.views
 
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,7 +25,6 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import me.tatarka.inject.annotations.Inject
@@ -51,6 +49,7 @@ import org.isoron.uhabits.core.ui.screens.habits.list.buildHabitListRows
 import org.isoron.uhabits.core.utils.MidnightTimer
 import org.isoron.uhabits.inject.ActivityScope
 import org.isoron.uhabits.utils.StyledResources
+import org.isoron.uhabits.utils.dp
 import org.isoron.uhabits.activities.common.views.RingView
 import java.util.LinkedList
 
@@ -166,7 +165,6 @@ class HabitCardListAdapter(
         val context = listView!!.context
         val input = EditText(context)
         input.setText(tag)
-        input.hint = context.getString(R.string.tags_example)
         AlertDialog.Builder(context)
             .setTitle(R.string.rename_tag)
             .setView(input)
@@ -290,11 +288,7 @@ class HabitCardListAdapter(
                     false
                 )
             ).also { holder ->
-                holder.ring.setThickness(
-                    TypedValue.applyDimension(
-                        TypedValue.COMPLEX_UNIT_DIP, 2f, parent.resources.displayMetrics
-                    )
-                )
+                holder.ring.setThickness(parent.context.dp(2f).toFloat())
             }
         } else {
             HabitCardViewHolder(listView!!.createHabitCardView())

@@ -45,6 +45,7 @@ import org.isoron.uhabits.core.commands.CommandRunner
 import org.isoron.uhabits.core.commands.EditHabitCommand
 import org.isoron.uhabits.core.models.Habit
 import org.isoron.uhabits.core.models.HabitList
+import org.isoron.uhabits.core.models.allTags
 import org.isoron.uhabits.core.models.ModelFactory
 import org.isoron.uhabits.core.models.PaletteColor
 import org.isoron.uhabits.core.preferences.Preferences
@@ -172,9 +173,7 @@ class ShowHabitActivity : AppCompatActivity(), CommandRunner.Listener {
     }
 
     private fun showAddTagDialog() {
-        val tags = mutableSetOf<String>()
-        for (habit in habitList) for (tag in habit.tags) tags.add(tag)
-        showAddTagDialog(this, tags.toList()) { picked ->
+        showAddTagDialog(this, habitList.allTags()) { picked ->
             editTags((habit.tags + picked).distinct())
         }
     }

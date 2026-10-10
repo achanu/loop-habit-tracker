@@ -21,6 +21,7 @@ package org.isoron.uhabits.core.ui.screens.habits.list
 import me.tatarka.inject.annotations.Inject
 import org.isoron.uhabits.core.commands.AddTagCommand
 import org.isoron.uhabits.core.commands.ArchiveHabitsCommand
+import org.isoron.uhabits.core.commands.BatchCommand
 import org.isoron.uhabits.core.commands.ChangeHabitColorCommand
 import org.isoron.uhabits.core.commands.CommandRunner
 import org.isoron.uhabits.core.commands.DeleteHabitsCommand
@@ -28,6 +29,7 @@ import org.isoron.uhabits.core.commands.RemoveTagCommand
 import org.isoron.uhabits.core.commands.UnarchiveHabitsCommand
 import org.isoron.uhabits.core.models.Habit
 import org.isoron.uhabits.core.models.HabitList
+import org.isoron.uhabits.core.models.allTags
 import org.isoron.uhabits.core.models.PaletteColor
 import org.isoron.uhabits.core.ui.callbacks.OnColorPickedCallback
 import org.isoron.uhabits.core.ui.callbacks.OnConfirmedCallback
@@ -57,11 +59,7 @@ class ListHabitsSelectionMenuBehavior(
     fun onAddTag() {
         val selected = adapter.getSelected()
         if (selected.isEmpty()) return
-        val tags = mutableSetOf<String>()
-        for (habit in habitList) {
-            for (tag in habit.tags) tags.add(tag)
-        }
-        screen.showTagPicker(tags.sorted()) { picked ->
+        screen.showTagPicker(habitList.allTags().sorted()) { picked ->
             // Only the habits that did not have each tag yet, so that undo
             // does not strip it from habits that had it all along.
             val addedTags = mutableListOf<String>()
@@ -69,16 +67,26 @@ class ListHabitsSelectionMenuBehavior(
             for (tag in picked) {
                 val targets = selected.filter { tag !in it.tags }
                 if (targets.isEmpty()) continue
-                commandRunner.run(AddTagCommand(habitList, targets, tag))
                 addedTags.add(tag)
                 addedTargets.add(targets)
             }
             val count = addedTargets.sumOf { it.size }
             if (count == 0) return@showTagPicker
+            commandRunner.run(
+                BatchCommand(
+                    addedTags.indices.map { i ->
+                        AddTagCommand(habitList, addedTargets[i], addedTags[i])
+                    }
+                )
+            )
             screen.showUndoTagAdded(count) {
-                for (i in addedTags.indices) {
-                    commandRunner.run(RemoveTagCommand(habitList, addedTargets[i], addedTags[i]))
-                }
+                commandRunner.run(
+                    BatchCommand(
+                        addedTags.indices.map { i ->
+                            RemoveTagCommand(habitList, addedTargets[i], addedTags[i])
+                        }
+                    )
+                )
             }
             adapter.clearSelection()
         }

@@ -215,3 +215,12 @@ abstract class HabitList : Iterable<Habit> {
         BY_POSITION
     }
 }
+
+/** Distinct tags used by any habit, in order of first appearance. */
+fun HabitList.allTags(): List<String> {
+    val tags = mutableSetOf<String>()
+    for (habit in this) {
+        for (tag in habit.tags) tags.add(tag)
+    }
+    return tags.toList()
+}

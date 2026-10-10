@@ -47,6 +47,7 @@ import org.isoron.uhabits.core.commands.CreateHabitCommand
 import org.isoron.uhabits.core.commands.EditHabitCommand
 import org.isoron.uhabits.core.models.Frequency
 import org.isoron.uhabits.core.models.Habit
+import org.isoron.uhabits.core.models.allTags
 import org.isoron.uhabits.core.models.HabitType
 import org.isoron.uhabits.core.models.NumericalHabitType
 import org.isoron.uhabits.core.models.PaletteColor
@@ -105,7 +106,7 @@ class EditHabitActivity : AppCompatActivity() {
         // tags; if this ever lags, move to the task runner.
         val tagAdapter = TagSuggestionAdapter(
             this,
-            component.habitList.flatMap { it.tags }.distinct()
+            component.habitList.allTags()
         )
         binding.tagsInput.setAdapter(tagAdapter)
         binding.tagsInput.setOnItemClickListener { _, _, position, _ ->

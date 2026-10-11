@@ -52,6 +52,14 @@ android {
     }
 
     signingConfigs {
+        // The debug keystore was moved out of ~/.android so that Android
+        // tooling cannot silently regenerate a different one.
+        getByName("debug") {
+            storeFile = file("/home/glucose/Documents/tools/debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
         if (System.getenv("LOOP_KEY_ALIAS") != null) {
             create("release") {
                 keyAlias = System.getenv("LOOP_KEY_ALIAS")

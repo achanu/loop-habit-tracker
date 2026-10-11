@@ -55,7 +55,7 @@ android {
         // The debug keystore was moved out of ~/.android so that Android
         // tooling cannot silently regenerate a different one.
         getByName("debug") {
-            storeFile = file("/home/glucose/Documents/tools/debug.keystore")
+            storeFile = file("/home/glucose/Documents/tools/loop-habit-tracker.keystore")
             storePassword = "android"
             keyAlias = "androiddebugkey"
             keyPassword = "android"

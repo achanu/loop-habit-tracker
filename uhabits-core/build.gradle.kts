@@ -65,7 +65,6 @@ kotlin {
                 implementation(libs.kotlinx.coroutines.core.jvm)
                 implementation(libs.annotation)
                 implementation(libs.jsr305)
-                implementation(libs.opencsv)
                 implementation(libs.commons.codec)
             }
         }

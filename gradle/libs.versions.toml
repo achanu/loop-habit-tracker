@@ -24,7 +24,6 @@ ktxCoroutine = "1.10.1"
 legacy-support = "1.0.0"
 material = "1.12.0"
 mokkery = "3.5.0"
-opencsv = "5.9"
 rules = "1.6.1"
 shadow = "8.1.1"
 sqliteJdbc = "3.45.1.0"
@@ -64,7 +63,6 @@ ktor-jackson = { group = "io.ktor", name = "ktor-jackson", version.ref = "ktor" 
 legacy-preference-v14 = { group = "androidx.legacy", name = "legacy-preference-v14", version.ref = "legacy-support" }
 legacy-support-v4 = { group = "androidx.legacy", name = "legacy-support-v4", version.ref = "legacy-support" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
-opencsv = { group = "com.opencsv", name = "opencsv", version.ref = "opencsv" }
 rules = { group = "androidx.test", name = "rules", version.ref = "rules" }
 sqlite-jdbc = { module = "org.xerial:sqlite-jdbc", version.ref = "sqliteJdbc" }
 uiautomator = { group = "androidx.test.uiautomator", name = "uiautomator", version.ref = "uiautomator" }
